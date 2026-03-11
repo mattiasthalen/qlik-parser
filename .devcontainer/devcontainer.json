@@ -2,9 +2,10 @@
   "name": "Go CLI",
   "image": "mcr.microsoft.com/devcontainers/go:1.24",
   "features": {
-    "ghcr.io/stu-bell/devcontainer-features/claude-code:0": {}
+    "ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers-extra/features/golangci-lint:1": {}
   },
-  "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
     "vscode": {
       "extensions": [
