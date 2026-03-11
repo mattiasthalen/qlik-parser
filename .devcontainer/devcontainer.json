@@ -17,6 +17,7 @@
       "settings": {
         "claudeCode.allowDangerouslySkipPermissions": true,
         "claudeCode.initialPermissionMode": "bypassPermissions",
+        "claudeCode.preferredLocation": "panel",
         "claudeCode.respectGitIgnore": false,
         "claudeCode.useTerminal": false
       }
