@@ -4,19 +4,13 @@ Date: 2026-03-11
 
 ## Overview
 
-A Go CLI tool that extracts QlikView load scripts (`.qvs`) from QVW binary files. Built on the `ckeletin-go` skeleton for production-grade scaffolding.
-
-## Bootstrap
-
-- Clone `ckeletin-go` and run `task init name=qlik-script-extractor module=github.com/peiman/qlik-script-extractor`
-- Replace current repo contents, preserving `.devcontainer/`, `.claude/`, `docs/`
-- Move QVW fixtures from `references/` to `internal/extractor/testdata/`, preserving the `extract/`, `transform/`, `load/` subdirectory structure; remove `references/`
+A Go CLI tool that extracts QlikView load scripts (`.qvs`) from QVW binary files.
 
 ## CLI Interface
 
 Binary name: `qlik-script-extractor`
 
-The ckeletin-go skeleton provides `version` and root-level `help` commands automatically. We add one command: `export`.
+The CLI provides `version` and root-level `help` commands automatically. We add one command: `export`.
 
 ### Subcommand: `export`
 
@@ -36,7 +30,7 @@ Flags:
 - `--out` not specified (empty string): write `.qvs` alongside the `.qvw` file
   - e.g. `/data/etl/sales.qvw` → `/data/etl/sales.qvs`
 
-## Architecture (ckeletin-go 4-layer pattern)
+## Architecture (4-layer pattern)
 
 ```
 main.go                          Entry — delegates to root command only
@@ -84,7 +78,7 @@ Recursively walk source directory using `fs.WalkDir`. Collect all `*.qvw` files,
 
 ## Terminal UI
 
-Built with `bubbletea` + `lipgloss` (provided by ckeletin-go skeleton). Colors and spinner are auto-disabled when stdout is not a TTY (piped/redirected). In non-TTY mode the spinner line is suppressed; only per-file result lines and the summary are printed as plain text.
+Built with `bubbletea` + `lipgloss`. Colors and spinner are auto-disabled when stdout is not a TTY (piped/redirected). In non-TTY mode the spinner line is suppressed; only per-file result lines and the summary are printed as plain text.
 
 ### During extraction
 
@@ -138,11 +132,11 @@ Additional rules:
 - `--dry-run` does not suppress error exit codes — files that would fail still count as ERR
 - Write failure for a specific `.qvs` file (e.g. disk full, permission denied): treat as per-file ERR (log, continue, exit 1)
 - No `///` marker is a WARN (exit 0) because a valid QVW may simply have no load script (e.g. a dashboard-only file). A file < 23 bytes is structurally invalid and cannot be a QVW, hence ERR (exit 1).
-- The ckeletin-go skeleton provides a `--log-level` flag (or equivalent) for enabling debug output via zerolog; this is inherited automatically and does not need additional implementation.
+- A `--log-level` flag enables debug output via zerolog.
 
 ## Testing
 
-Follows ckeletin-go's >80% coverage requirement. Sequential processing only (no concurrency).
+Follows >80% coverage requirement. Sequential processing only (no concurrency).
 
 ### Unit tests (`internal/extractor/`)
 
@@ -169,9 +163,8 @@ Run full `export` command against `internal/extractor/testdata/` fixtures, verif
 
 ## Dependencies
 
-Provided by ckeletin-go skeleton:
 - `github.com/spf13/cobra` — subcommand CLI framework
-- `github.com/spf13/viper` — config management (inherited from skeleton; not used for `export` flags — no env var or config file overrides for this command)
+- `github.com/spf13/viper` — config management (not used for `export` flags — no env var or config file overrides for this command)
 - `github.com/rs/zerolog` — structured logging (stderr)
 - `github.com/charmbracelet/bubbletea` — terminal UI (stdout)
 - `github.com/charmbracelet/lipgloss` — terminal styling
