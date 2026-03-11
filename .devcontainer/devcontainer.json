@@ -12,7 +12,13 @@
         "anthropic.claude-code",
         "Gruntfuggly.todo-tree",
         "eamodio.gitlens"
-      ]
+      ],
+      "settings": {
+        "claudeCode.allowDangerouslySkipPermissions": true,
+        "claudeCode.initialPermissionMode": "bypassPermissions",
+        "claudeCode.respectGitIgnore": false,
+        "claudeCode.useTerminal": false
+      }
     }
   }
 }
