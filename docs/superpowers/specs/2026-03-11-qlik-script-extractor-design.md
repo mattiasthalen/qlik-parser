@@ -25,9 +25,9 @@ qlik-script-extractor export [--source <dir>] [--out <dir>] [--dry-run]
 ```
 
 Flags:
-- `--source` / `-s` — source directory to scan for `.qvw` files (default: CWD). Must be a directory; passing a single file path is an error.
+- `--source` / `-s` — source directory to scan for `.qvw` files (default: `os.Getwd()` resolved at startup). Must be a directory; passing a single file path is an error. Paths shown in per-file output are relative to `--source`.
 - `--out` / `-o` — export directory for `.qvs` output (default: `""` — empty string signals alongside mode)
-- `--dry-run` — show what would be extracted without writing any files
+- `--dry-run` — show what would be extracted without writing any files (no short form)
 
 ### Output path resolution
 
@@ -61,7 +61,7 @@ Before processing, validate:
 
 ### Decompression
 
-Read raw bytes from `.qvw`, skip first 23 bytes, pass remainder to `compress/zlib`. Decode the resulting bytes to a Go `string` using `strings.ToValidUTF8` (replacing invalid byte sequences with the Unicode replacement character `\uFFFD`). Replacement characters are preserved as-is in the written `.qvs` output.
+Read raw bytes from `.qvw`, skip first 23 bytes, pass remainder to `compress/zlib`. The result is a raw `[]byte` — no UTF-8 conversion at this stage. Conversion happens only after script extraction (see step 7 of Script extraction below).
 
 ### Script extraction
 
@@ -75,7 +75,7 @@ All extraction operates on the raw decompressed **byte slice** before any UTF-8 
 4. Search `region` for end marker: byte pattern `\r\n` followed by 2+ `\x00` bytes, or `\n` followed by 2+ `\x00` bytes
 5. If end marker found: script bytes = `region[:matchStart]` (exclude the trailing newline and null bytes)
 6. If no end marker: script bytes = full `region`
-7. Convert script bytes to UTF-8 string using `strings.ToValidUTF8` (replacement character for invalid sequences)
+7. Convert script bytes to UTF-8 string: `strings.ToValidUTF8(string(scriptBytes), "\uFFFD")`. Replacement characters are preserved as-is in the output.
 8. Write script string as UTF-8 to the output `.qvs` path
 
 ### File walking
@@ -102,10 +102,10 @@ Colors: green ✓, yellow ⚠, red ✗.
 
 ### Dry-run output
 
-Per-file lines under `--dry-run` use the same symbols as normal output but suffix with `[dry run]`:
+Per-file lines under `--dry-run` use the same symbols as normal output with a `[dry run]` suffix:
 
 ```
-  ~  sales.qvw → sales.qvs  (4,821 chars)  [dry run]
+  ✓  sales.qvw → sales.qvs  (4,821 chars)  [dry run]
   ⚠  empty.qvw  no script found  [dry run]
   ✗  corrupt.qvw  zlib: invalid header  [dry run]
 ```
@@ -116,7 +116,7 @@ Per-file lines under `--dry-run` use the same symbols as normal output but suffi
   Extracted 10 scripts   ✓ 10  ⚠ 1  ✗ 1
 ```
 
-Dry-run summary: `Dry run — 10 files would be extracted  ~ 10  ⚠ 1  ✗ 1`
+Dry-run summary: `Dry run — 10 files would be extracted  ✓ 10  ⚠ 1  ✗ 1`
 
 ## Error Handling & Exit Codes
 
@@ -132,7 +132,8 @@ Dry-run summary: `Dry run — 10 files would be extracted  ~ 10  ⚠ 1  ✗ 1`
 
 Additional rules:
 - Per-file errors are non-fatal: log and continue processing remaining files
-- If `--out` directory does not exist: create it including parents before writing
+- `--out` directory and all mirrored subdirectories are created with `os.MkdirAll` before the first write; if creation fails the whole run exits 1 immediately (no partial output)
+- `--dry-run` with no files found: exit 0, summary shows "Dry run — 0 files would be extracted"
 - `--dry-run` does not suppress error exit codes — files that would fail still count as ERR
 - Write failure for a specific `.qvs` file (e.g. disk full, permission denied): treat as per-file ERR (log, continue, exit 1)
 - No `///` marker is a WARN (exit 0) because a valid QVW may simply have no load script (e.g. a dashboard-only file). A file < 23 bytes is structurally invalid and cannot be a QVW, hence ERR (exit 1).
@@ -150,7 +151,7 @@ Follows ckeletin-go's >80% coverage requirement. Sequential processing only (no 
 
 ### Integration test (`cmd/export_test.go`)
 
-Run full `export` command against `internal/extractor/testdata/` fixtures, verify `.qvs` files produced with expected content. Golden files live alongside the fixtures in `internal/extractor/testdata/` with a `.qvs.golden` extension. Regenerate with `go test ./... -update`.
+Run full `export` command against `internal/extractor/testdata/` fixtures, verify `.qvs` files produced with expected content. Golden files live in `internal/extractor/testdata/` with a `.qvs.golden` extension. The integration test package registers a `-update` flag: `go test ./cmd/... -update` regenerates golden files.
 
 ### Edge cases
 
