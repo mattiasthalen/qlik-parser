@@ -25,7 +25,7 @@ qlik-script-extractor export [--source <dir>] [--out <dir>] [--dry-run]
 ```
 
 Flags:
-- `--source` / `-s` — source directory to scan for `.qvw` files (default: `os.Getwd()` resolved at startup). Must be a directory; passing a single file path is an error. Paths shown in per-file output are relative to `--source`.
+- `--source` / `-s` — source directory to scan for `.qvw` files (default: `os.Getwd()` evaluated when the `export` command's `RunE` function is entered). Must be a directory; passing a single file path is an error. Paths shown in per-file output are relative to `--source` (e.g. `etl/sales.qvw → etl/sales.qvs`).
 - `--out` / `-o` — export directory for `.qvs` output (default: `""` — empty string signals alongside mode)
 - `--dry-run` — show what would be extracted without writing any files (no short form)
 
@@ -69,13 +69,13 @@ All extraction operates on the raw decompressed **byte slice** before any UTF-8 
 
 `///` is the QlikView load script section delimiter. Its position varies per file; scan for first occurrence.
 
-1. Find byte offset of first occurrence of `///` in the decompressed bytes
+1. Find byte offset of first occurrence of `///` in the decompressed bytes. Let `scriptStart` = that offset (the `///` itself is included as the first three bytes of the extracted script).
 2. If not found: emit WARN (`no script found`), skip file, continue
-3. Let `region = bytes[scriptStart : scriptStart + 100_000]` (capped at end of slice). If the script exceeds 100,000 bytes it is silently truncated — this is intentional; QlikView scripts are not expected to exceed this size.
-4. Search `region` for end marker: byte pattern `\r\n` followed by 2+ `\x00` bytes, or `\n` followed by 2+ `\x00` bytes
-5. If end marker found: script bytes = `region[:matchStart]` (exclude the trailing newline and null bytes)
+3. Let `region = bytes[scriptStart : min(scriptStart+100_000, len(bytes))]`. Truncation is silent — QlikView scripts are not expected to exceed 100,000 bytes in practice.
+4. Search `region` for the **first** occurrence of the end marker: `\r\n` followed by two or more consecutive `\x00` bytes (`\r\n\x00\x00+`), or `\n` followed by two or more consecutive `\x00` bytes (`\n\x00\x00+`)
+5. If end marker found: script bytes = `region[:matchStart]` (up to but not including the trailing newline)
 6. If no end marker: script bytes = full `region`
-7. Convert script bytes to UTF-8 string: `strings.ToValidUTF8(string(scriptBytes), "\uFFFD")`. Replacement characters are preserved as-is in the output.
+7. Convert script bytes to UTF-8 string: `strings.ToValidUTF8(string(scriptBytes), "\uFFFD")`. Replacement characters are preserved as-is in the output. No BOM is written.
 8. Write script string as UTF-8 to the output `.qvs` path
 
 ### File walking
@@ -88,7 +88,7 @@ Built with `bubbletea` + `lipgloss` (provided by ckeletin-go skeleton). Colors a
 
 ### During extraction
 
-Spinner with running count: `Extracting... 3/12`
+Spinner with running count: `Extracting... 3/12`. The total count (12) is determined by a full directory walk before extraction begins (two-phase: collect all `.qvw` paths, then process them sequentially).
 
 ### Per-file output
 
@@ -132,8 +132,9 @@ Dry-run summary: `Dry run — 10 files would be extracted  ✓ 10  ⚠ 1  ✗ 1`
 
 Additional rules:
 - Per-file errors are non-fatal: log and continue processing remaining files
-- `--out` directory and all mirrored subdirectories are created with `os.MkdirAll` before the first write; if creation fails the whole run exits 1 immediately (no partial output)
+- `--out` top-level directory is pre-flighted with `os.MkdirAll` before processing begins; if that fails, exit 1 immediately. Mirrored subdirectories are created per-file just before writing; if a subdirectory creation fails for a specific file, it is treated as a per-file ERR (log, continue).
 - `--dry-run` with no files found: exit 0, summary shows "Dry run — 0 files would be extracted"
+- `--out` equal to `--source` is accepted; `.qvs` files land next to their `.qvw` sources (same as alongside mode)
 - `--dry-run` does not suppress error exit codes — files that would fail still count as ERR
 - Write failure for a specific `.qvs` file (e.g. disk full, permission denied): treat as per-file ERR (log, continue, exit 1)
 - No `///` marker is a WARN (exit 0) because a valid QVW may simply have no load script (e.g. a dashboard-only file). A file < 23 bytes is structurally invalid and cannot be a QVW, hence ERR (exit 1).
@@ -151,7 +152,7 @@ Follows ckeletin-go's >80% coverage requirement. Sequential processing only (no 
 
 ### Integration test (`cmd/export_test.go`)
 
-Run full `export` command against `internal/extractor/testdata/` fixtures, verify `.qvs` files produced with expected content. Golden files live in `internal/extractor/testdata/` with a `.qvs.golden` extension. The integration test package registers a `-update` flag: `go test ./cmd/... -update` regenerates golden files.
+Run full `export` command against `internal/extractor/testdata/` fixtures, verify `.qvs` files produced with expected content. Golden files (containing only the extracted script string, no metadata) live in `internal/extractor/testdata/` with a `.qvs.golden` extension, mirroring the fixture subdirectory structure. The integration test package registers a `-update` flag: `go test ./cmd/... -update` regenerates golden files.
 
 ### Edge cases
 
@@ -170,7 +171,7 @@ Run full `export` command against `internal/extractor/testdata/` fixtures, verif
 
 Provided by ckeletin-go skeleton:
 - `github.com/spf13/cobra` — subcommand CLI framework
-- `github.com/spf13/viper` — config/env var support
+- `github.com/spf13/viper` — config management (inherited from skeleton; not used for `export` flags — no env var or config file overrides for this command)
 - `github.com/rs/zerolog` — structured logging (stderr)
 - `github.com/charmbracelet/bubbletea` — terminal UI (stdout)
 - `github.com/charmbracelet/lipgloss` — terminal styling
