@@ -26,6 +26,8 @@ and extracts the embedded load scripts to .qvs text files.`,
 		},
 	}
 
+	root.AddCommand(newVersionCmd())
+
 	root.PersistentFlags().StringVar(&logLevel, "log-level", "disabled",
 		"Log level: debug, info, warn, error, disabled")
 
