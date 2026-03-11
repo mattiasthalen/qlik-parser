@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+## Memory
+
+Project-specific memory (conventions, feedback, context) lives in this file (`CLAUDE.md` at the repo root). Do not use `.claude/MEMORY.md` or any other location.
+
 ## Conventions
 
 - Commit messages use conventional commits style: `feat:`, `fix:`, `chore:`, `docs:`, etc.
