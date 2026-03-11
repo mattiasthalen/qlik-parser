@@ -31,8 +31,8 @@ Flags:
 
 ### Output path resolution
 
-- `--out` specified (non-empty): mirror source folder structure under export dir
-  - e.g. `--source /data --out /out` → `/data/etl/sales.qvw` → `/out/etl/sales.qvs`
+- `--out` specified (non-empty): mirror source folder structure under export dir. All intermediate subdirectories are created automatically as needed.
+  - e.g. `--source /data --out /out` → `/data/etl/sales.qvw` → `/out/etl/sales.qvs` (creates `/out/etl/` if needed)
 - `--out` not specified (empty string): write `.qvs` alongside the `.qvw` file
   - e.g. `/data/etl/sales.qvw` → `/data/etl/sales.qvs`
 
@@ -65,15 +65,18 @@ Read raw bytes from `.qvw`, skip first 23 bytes, pass remainder to `compress/zli
 
 ### Script extraction
 
-`///` in the QlikView format is the delimiter that marks the start of the load script section. It always appears at a fixed position in the decompressed content; only the first occurrence is used.
+All extraction operates on the raw decompressed **byte slice** before any UTF-8 conversion, to avoid null-byte ambiguity after replacement-character substitution. UTF-8 conversion is applied only to the final extracted script bytes before writing to disk.
 
-1. Find byte index of first occurrence of `///` in the decompressed string
+`///` is the QlikView load script section delimiter. Its position varies per file; scan for first occurrence.
+
+1. Find byte offset of first occurrence of `///` in the decompressed bytes
 2. If not found: emit WARN (`no script found`), skip file, continue
-3. Let `region = text[scriptStart : scriptStart + 100_000]` (capped at end of string)
-4. Search `region` for end marker regex `\r\n\x00{2,}` or `\n\x00{2,}`
-5. If end marker found: script = `region[:matchStart]` (exclude the trailing newline and null bytes)
-6. If no end marker: script = full `region`
-7. Write script as UTF-8 to the output `.qvs` path
+3. Let `region = bytes[scriptStart : scriptStart + 100_000]` (capped at end of slice). If the script exceeds 100,000 bytes it is silently truncated — this is intentional; QlikView scripts are not expected to exceed this size.
+4. Search `region` for end marker: byte pattern `\r\n` followed by 2+ `\x00` bytes, or `\n` followed by 2+ `\x00` bytes
+5. If end marker found: script bytes = `region[:matchStart]` (exclude the trailing newline and null bytes)
+6. If no end marker: script bytes = full `region`
+7. Convert script bytes to UTF-8 string using `strings.ToValidUTF8` (replacement character for invalid sequences)
+8. Write script string as UTF-8 to the output `.qvs` path
 
 ### File walking
 
@@ -99,8 +102,12 @@ Colors: green ✓, yellow ⚠, red ✗.
 
 ### Dry-run output
 
+Per-file lines under `--dry-run` use the same symbols as normal output but suffix with `[dry run]`:
+
 ```
   ~  sales.qvw → sales.qvs  (4,821 chars)  [dry run]
+  ⚠  empty.qvw  no script found  [dry run]
+  ✗  corrupt.qvw  zlib: invalid header  [dry run]
 ```
 
 ### Summary
@@ -127,6 +134,9 @@ Additional rules:
 - Per-file errors are non-fatal: log and continue processing remaining files
 - If `--out` directory does not exist: create it including parents before writing
 - `--dry-run` does not suppress error exit codes — files that would fail still count as ERR
+- Write failure for a specific `.qvs` file (e.g. disk full, permission denied): treat as per-file ERR (log, continue, exit 1)
+- No `///` marker is a WARN (exit 0) because a valid QVW may simply have no load script (e.g. a dashboard-only file). A file < 23 bytes is structurally invalid and cannot be a QVW, hence ERR (exit 1).
+- The ckeletin-go skeleton provides a `--log-level` flag (or equivalent) for enabling debug output via zerolog; this is inherited automatically and does not need additional implementation.
 
 ## Testing
 
@@ -140,7 +150,7 @@ Follows ckeletin-go's >80% coverage requirement. Sequential processing only (no 
 
 ### Integration test (`cmd/export_test.go`)
 
-Run full `export` command against `internal/extractor/testdata/` fixtures, verify `.qvs` files produced with expected content (golden files).
+Run full `export` command against `internal/extractor/testdata/` fixtures, verify `.qvs` files produced with expected content. Golden files live alongside the fixtures in `internal/extractor/testdata/` with a `.qvs.golden` extension. Regenerate with `go test ./... -update`.
 
 ### Edge cases
 
