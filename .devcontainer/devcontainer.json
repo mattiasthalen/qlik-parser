@@ -1,0 +1,5 @@
+{
+  "name": "Go CLI",
+  "image": "mcr.microsoft.com/devcontainers/go:1.24",
+  "postCreateCommand": "bash .devcontainer/setup.sh"
+}
