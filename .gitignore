@@ -1,2 +1,4 @@
 *.qvw
 *.qvf
+qlik-script-extractor
+coverage.out
