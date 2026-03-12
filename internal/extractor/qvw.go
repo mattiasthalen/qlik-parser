@@ -48,7 +48,7 @@ func ExtractScript(path string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("%s: zlib: %w", path, err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 
 	decompressed, err := io.ReadAll(r)
 	if err != nil {

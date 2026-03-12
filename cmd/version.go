@@ -14,7 +14,7 @@ func newVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Print version information",
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Fprintf(cmd.OutOrStdout(), "qlik-script-extractor %s\n", Version)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "qlik-script-extractor %s\n", Version)
 		},
 	}
 }
