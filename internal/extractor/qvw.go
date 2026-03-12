@@ -11,7 +11,6 @@ import (
 )
 
 const headerSize = 23
-const maxScriptRegion = 100_000
 
 // NoScriptError is returned when no /// marker is found in the decompressed data.
 type NoScriptError struct {
@@ -66,11 +65,7 @@ func extractFromBytes(path string, data []byte) (string, error) {
 		return "", &NoScriptError{Path: path}
 	}
 
-	end := scriptStart + maxScriptRegion
-	if end > len(data) {
-		end = len(data)
-	}
-	region := data[scriptStart:end]
+	region := data[scriptStart:]
 
 	scriptBytes := trimAtEndMarker(region)
 	return strings.ToValidUTF8(string(scriptBytes), "\uFFFD"), nil

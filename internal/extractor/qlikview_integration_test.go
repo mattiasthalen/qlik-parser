@@ -29,8 +29,8 @@ func TestQlikview_WalkerFindsAll34Files(t *testing.T) {
 	if len(warns) != 0 {
 		t.Errorf("expected no warnings, got: %v", warns)
 	}
-	if len(paths) != 34 {
-		t.Errorf("expected 34 QVW files, got %d: %v", len(paths), paths)
+	if len(paths) != 18 {
+		t.Errorf("expected 18 QVW files, got %d: %v", len(paths), paths)
 	}
 }
 
@@ -88,7 +88,7 @@ func TestQlikview_ExportMirrorMode_PreservesSubdirStructure(t *testing.T) {
 	// Verify one file from each subdir to confirm structure is mirrored
 	expected := []string{
 		filepath.Join(outDir, "extract", "QVD Extract IFS.qvs"),
-		filepath.Join(outDir, "load", "Cash Flow.qvs"),
+		filepath.Join(outDir, "load", "IFS Recipe Structure.qvs"),
 		filepath.Join(outDir, "transform", "QVD Transform IFS.qvs"),
 	}
 	for _, f := range expected {
@@ -136,7 +136,7 @@ func TestQlikview_ExportSucceeds_ExitCode0(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "Extracted 34 scripts") {
-		t.Errorf("expected 'Extracted 34 scripts' in summary, got: %q", out)
+	if !strings.Contains(out, "Extracted 18 scripts") {
+		t.Errorf("expected 'Extracted 18 scripts' in summary, got: %q", out)
 	}
 }

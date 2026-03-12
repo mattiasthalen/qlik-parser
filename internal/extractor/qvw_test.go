@@ -67,20 +67,23 @@ func TestExtractScript_NoEndMarker(t *testing.T) {
 	}
 }
 
-func TestExtractScript_TruncatesAt100k(t *testing.T) {
+func TestExtractScript_LongScriptNotTruncated(t *testing.T) {
+	const scriptLen = 200_000
 	var buf bytes.Buffer
 	w := zlib.NewWriter(&buf)
-	payload := make([]byte, 200_100)
+	payload := make([]byte, scriptLen+10) // +10 for end marker
 	copy(payload, []byte("///"))
-	for i := 3; i < len(payload); i++ {
+	for i := 3; i < scriptLen; i++ {
 		payload[i] = 'X'
 	}
+	// end marker: \n followed by two \x00 bytes
+	copy(payload[scriptLen:], []byte{'\n', 0x00, 0x00})
 	_, _ = w.Write(payload)
 	_ = w.Close()
 	header := make([]byte, 23)
 	data := append(header, buf.Bytes()...)
 
-	f, err := os.CreateTemp("", "truncate_test_*.qvw")
+	f, err := os.CreateTemp("", "long_script_test_*.qvw")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -92,8 +95,8 @@ func TestExtractScript_TruncatesAt100k(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if len(script) > 100_000 {
-		t.Errorf("expected script truncated to 100,000 bytes, got %d", len(script))
+	if len(script) < scriptLen-1 {
+		t.Errorf("expected full script (~%d chars), got %d — possible truncation", scriptLen, len(script))
 	}
 }
 
