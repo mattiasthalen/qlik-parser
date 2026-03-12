@@ -1,5 +1,7 @@
+.worktrees/
 # Real QlikView files (integration test fixtures, not for committing)
 internal/extractor/testdata/qlikview/
 *.qvf
 qlik-script-extractor
 coverage.out
+dist/

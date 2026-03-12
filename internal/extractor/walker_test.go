@@ -3,6 +3,7 @@ package extractor_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"testing"
 
@@ -67,6 +68,9 @@ func TestWalkIgnoresNonQVW(t *testing.T) {
 }
 
 func TestWalkUnreadableSubdirEmitsWarn(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("chmod 0000 does not restrict access on Windows")
+	}
 	if os.Getuid() == 0 {
 		t.Skip("running as root — permission tests unreliable")
 	}

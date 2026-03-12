@@ -150,7 +150,8 @@ func TestExportCmd_Integration_ValidFixture(t *testing.T) {
 	if err != nil {
 		t.Fatalf("golden file not found: %v — run with -update to create it", err)
 	}
-	if !bytes.Equal(gotBytes, wantBytes) {
+	normalize := func(b []byte) string { return strings.ReplaceAll(string(b), "\r\n", "\n") }
+	if normalize(gotBytes) != normalize(wantBytes) {
 		t.Errorf("output does not match golden file.\ngot:  %q\nwant: %q", gotBytes, wantBytes)
 	}
 }

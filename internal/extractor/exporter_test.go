@@ -3,12 +3,16 @@ package extractor_test
 import (
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/mattiasthalen/qlik-script-extractor/internal/extractor"
 )
 
 func TestResolveOutputPath_Alongside(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
 	qvwPath := "/data/etl/sales.qvw"
 	got := extractor.ResolveOutputPath(qvwPath, "/data", "")
 	want := "/data/etl/sales.qvs"
@@ -18,6 +22,9 @@ func TestResolveOutputPath_Alongside(t *testing.T) {
 }
 
 func TestResolveOutputPath_Mirror(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
 	qvwPath := "/data/etl/sales.qvw"
 	got := extractor.ResolveOutputPath(qvwPath, "/data", "/out")
 	want := "/out/etl/sales.qvs"
@@ -27,6 +34,9 @@ func TestResolveOutputPath_Mirror(t *testing.T) {
 }
 
 func TestResolveOutputPath_OutEqualSource(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
 	qvwPath := "/data/etl/sales.qvw"
 	got := extractor.ResolveOutputPath(qvwPath, "/data", "/data")
 	want := "/data/etl/sales.qvs"
