@@ -58,7 +58,7 @@ func TestWalkFindsQVWFiles(t *testing.T) {
 func TestWalkIgnoresNonQVW(t *testing.T) {
 	root := t.TempDir()
 	for _, name := range []string{"a.qvf", "b.txt", "c.qvs", "d.QVW"} {
-		os.WriteFile(filepath.Join(root, name), []byte{0x00}, 0644)
+		_ = os.WriteFile(filepath.Join(root, name), []byte{0x00}, 0644)
 	}
 	got, _ := extractor.Walk(root)
 	if len(got) != 0 {
@@ -75,7 +75,7 @@ func TestWalkUnreadableSubdirEmitsWarn(t *testing.T) {
 	if err := os.MkdirAll(denied, 0000); err != nil {
 		t.Fatal(err)
 	}
-	t.Cleanup(func() { os.Chmod(denied, 0755) })
+	t.Cleanup(func() { _ = os.Chmod(denied, 0755) })
 
 	_, warns := extractor.Walk(root)
 	if len(warns) == 0 {
@@ -86,8 +86,8 @@ func TestWalkUnreadableSubdirEmitsWarn(t *testing.T) {
 func TestWalkDoesNotFollowSymlinks(t *testing.T) {
 	root := t.TempDir()
 	target := t.TempDir()
-	os.WriteFile(filepath.Join(target, "linked.qvw"), []byte{0x00}, 0644)
-	os.Symlink(target, filepath.Join(root, "link"))
+	_ = os.WriteFile(filepath.Join(target, "linked.qvw"), []byte{0x00}, 0644)
+	_ = os.Symlink(target, filepath.Join(root, "link"))
 
 	got, _ := extractor.Walk(root)
 	for _, f := range got {

@@ -72,8 +72,8 @@ func TestExtractScript_TruncatesAt100k(t *testing.T) {
 	for i := 3; i < len(payload); i++ {
 		payload[i] = 'X'
 	}
-	w.Write(payload)
-	w.Close()
+	_, _ = w.Write(payload)
+	_ = w.Close()
 	header := make([]byte, 23)
 	data := append(header, buf.Bytes()...)
 
@@ -81,9 +81,9 @@ func TestExtractScript_TruncatesAt100k(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f.Name())
-	f.Write(data)
-	f.Close()
+	defer func() { _ = os.Remove(f.Name()) }()
+	_, _ = f.Write(data)
+	_ = f.Close()
 
 	script, err := extractor.ExtractScript(f.Name())
 	if err != nil {
