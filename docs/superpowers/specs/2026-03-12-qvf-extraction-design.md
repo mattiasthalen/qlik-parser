@@ -23,6 +23,7 @@ The tool currently extracts load scripts from `.qvw` (QlikView) files only. Qlik
 - Multiple zlib-compressed blocks at various offsets throughout the file
 - The load script lives inside one block whose decompressed content is a JSON object: `{"qScript": "...load script..."}`
 - The script itself starts with `///$tab` (same convention as QVW)
+- Files can be large (Qlik Sense apps embed data models, visualisations, etc.); the design accepts reading the whole file into memory, which is consistent with the existing QVW approach
 
 ---
 
@@ -38,10 +39,11 @@ func ExtractScriptFromQVF(path string) (string, error)
 
 **Algorithm:**
 1. Read the entire file into memory.
-2. Scan byte-by-byte for zlib stream candidates: bytes `0x78` followed by `0x01`, `0x9C`, `0xDA`, or `0x5E`.
-3. For each candidate, attempt `zlib.Decompress`. On success, attempt `json.Unmarshal` into a struct with a `QScript string` field.
-4. Return the first successfully unmarshalled `QScript` value.
-5. If no stream yields a `qScript`, return `&NoScriptError{Path: path}` — reusing the existing error type for consistent caller behaviour.
+2. Scan byte-by-byte for zlib stream candidates: byte `0x78` followed by one of `0x01`, `0x5E`, `0x9C`, `0xDA` (the four standard RFC 1950 level values for CMF=0x78).
+3. For each candidate, attempt `zlib.Decompress`. On failure (not a real zlib stream), **silently skip** and continue scanning.
+4. On successful decompression, attempt `json.Unmarshal` into a struct with a `QScript string \`json:"qScript"\`` field. On failure (not the target block), **silently skip**.
+5. Return the first successfully unmarshalled non-empty `QScript` value.
+6. If no stream yields a `qScript`, return `&NoScriptError{Path: path}` — reusing the existing error type. The condition for QVF is "no block with a valid `qScript` field" rather than "no `///` marker", but `NoScriptError.Error()` returns the generic `"no script found"` which is accurate for both formats.
 
 Error cases mirror QVW:
 - File unreadable → wrapped `os` error
@@ -52,32 +54,35 @@ Error cases mirror QVW:
 Extend `Walk` to collect both `.qvw` and `.qvf` files:
 
 ```go
-if !d.IsDir() && (filepath.Ext(path) == ".qvw" || filepath.Ext(path) == ".qvf") {
+ext := filepath.Ext(path)
+if !d.IsDir() && (ext == ".qvw" || ext == ".qvf") {
     paths = append(paths, path)
 }
 ```
 
 No changes to the function signature or return types.
 
+**Test impact:** `TestWalkIgnoresNonQVW` currently asserts `.qvf` is ignored. That test must be updated: remove `.qvf` from the ignored-extensions list and add a `.qvf` case to the collected-extensions assertion.
+
 ### 3. Modified: `internal/extractor/exporter.go`
 
-`ResolveOutputPath` currently hardcodes `.qvw` suffix trimming. Generalise to strip the actual extension:
-
-```go
-base := strings.TrimSuffix(filepath.Base(inputPath), filepath.Ext(inputPath))
-```
+`ResolveOutputPath` currently hardcodes `.qvw` suffix trimming. Generalise to strip the actual extension via `filepath.Ext`. The function signature parameter name is updated from `qvwPath` to `inputPath` for clarity (internal change only — no callers use named parameters).
 
 Output extension by format:
 - `.qvw` → `.qvs`
 - `.qvf` → `.qvf.qvs`
 
-This avoids silent collision when `report.qvw` and `report.qvf` exist in the same directory. The function signature gains an `ext string` parameter (or derives it from path).
+The double-extension for `.qvf` is intentional: it avoids silent overwrite when `report.qvw` and `report.qvf` both exist in the same directory (which would otherwise both resolve to `report.qvs`). It also makes the source format visible in the output filename.
+
+**Test impact:** `exporter_test.go` gains new cases for `.qvf` inputs asserting `.qvf.qvs` output. Existing `.qvw` cases continue to pass unchanged.
 
 ### 4. Modified: `cmd/extract.go`
 
 After `Walk`, dispatch on file extension:
 
 ```go
+var scriptContent string
+var extractErr error
 switch filepath.Ext(path) {
 case ".qvw":
     scriptContent, extractErr = extractor.ExtractScript(path)
@@ -86,7 +91,11 @@ case ".qvf":
 }
 ```
 
-`ResolveOutputPath` call updated to handle the new output extension logic.
+`ResolveOutputPath` call is unchanged in structure; it now correctly derives the output extension from the input extension via `filepath.Ext`.
+
+**Naming:** The `Result` struct in `internal/ui/output.go` has a field currently named `QVWPath`. This field is renamed to `SrcPath` to reflect that it now holds paths for both `.qvw` and `.qvf` inputs. All callers (`cmd/extract.go`, `output_test.go`) are updated accordingly.
+
+**Help text:** The `--source` flag description and `Short`/`Long` command descriptions are updated to reference both `.qvw` and `.qvf` files.
 
 ---
 
@@ -103,7 +112,17 @@ Rationale: avoids silent overwrite when both formats share a filename in the sam
 
 ## Script Marker Convention
 
-Both formats use `///$tab` as the script start marker. All integration tests (QVW and QVF) assert `strings.HasPrefix(script, "///$tab")` — not just `"///"`. The existing QVW integration test is updated to match.
+Both formats use `///$tab` as the script start marker. All tests that check the script prefix are updated to assert `strings.HasPrefix(script, "///$tab")` — both unit tests (`qvw_test.go`) and integration tests.
+
+---
+
+## Test Fixtures
+
+The integration fixture directory `testdata/fixtures/integration/` already contains:
+- `Governance.Dashboard.2.1.4.qvw` (existing)
+- `Qlik_Sense_Content_Monitor.qvf` (already present in the repo)
+
+No new fixture files need to be added. The integration tests will use both existing files.
 
 ---
 
@@ -113,19 +132,35 @@ Both formats use `///$tab` as the script start marker. All integration tests (QV
 
 | Test | Fixture | Expected |
 |------|---------|----------|
-| File too short | synthetic | error (not NoScriptError) |
-| No zlib stream with qScript | synthetic | `*NoScriptError` |
-| Valid qScript in zlib JSON | synthetic minimal | script string returned |
+| File too short / unreadable | synthetic in-memory | wrapped `os` error |
+| Valid zlib streams but none with `qScript` | synthetic in-memory | `*NoScriptError` |
+| Valid `qScript` in zlib-compressed JSON | synthetic in-memory | script string returned |
 
-Synthetic fixtures are constructed in-memory (no files on disk) using the same pattern as `qvw_test.go`.
+Synthetic fixtures are constructed in-memory (no files on disk), consistent with the pattern in `qvw_test.go`.
+
+### Unit tests: `internal/extractor/qvw_test.go`
+
+- Script prefix assertion tightened from `"///"` to `"///$tab"` for the valid fixture test.
+
+### Unit tests: `internal/extractor/exporter_test.go`
+
+- New cases for `.qvf` input → `.qvf.qvs` output.
+- Existing `.qvw` cases unchanged.
+
+### Unit tests: `internal/extractor/walker_test.go`
+
+- `TestWalkIgnoresNonQVW` updated: `.qvf` removed from ignored list, added to collected list.
 
 ### Integration tests: `internal/extractor/qlikview_integration_test.go`
 
-Updates:
-- `TestQlikview_WalkerFindsAllFiles`: expect **2** files (1 QVW + 1 QVF)
-- `TestQlikview_AllFilesExtractWithoutError`: covers both via the dispatch pattern
-- `TestQlikview_AllScriptsStartWithTripleSlash`: tightened to `///$tab` for both formats
-- `TestQlikview_ExtractSucceeds_ExitCode0`: expect `"Extracted 2 scripts"` in summary
+| Test | Change |
+|------|--------|
+| `TestQlikview_WalkerFindsAllFiles` | Expect **2** files (1 QVW + 1 QVF) |
+| `TestQlikview_AllFilesExtractWithoutError` | Covers both via extension dispatch |
+| `TestQlikview_AllScriptsStartWithTripleSlash` | Tightened to `"///$tab"` |
+| `TestQlikview_ExtractSucceeds_ExitCode0` | Expect `"Extracted 2 scripts"` in summary |
+
+The `skipIfNoQlikviewFixtures` guard remains unchanged — it checks for the directory, which already contains both files.
 
 ---
 
@@ -134,4 +169,4 @@ Updates:
 - The `NoScriptError` type and `IsNoScript` helper — reused as-is
 - The `WriteScript` function — unchanged
 - The `--script`, `--dry-run`, `--source`, `--out` CLI flags — unchanged
-- TTY/spinner/printer logic — unchanged
+- TTY/spinner/printer logic — unchanged (beyond the `QVWPath` → `SrcPath` rename in `Result`)
