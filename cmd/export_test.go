@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/cmd"
+	"github.com/mattiasthalen/qlik-parser/cmd"
 )
 
 var update = flag.Bool("update", false, "Update golden files")

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mattiasthalen/qlik-script-extractor/internal/extractor"
+	"github.com/mattiasthalen/qlik-parser/internal/extractor"
 )
 
 func main() {

@@ -10,8 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 
-	"github.com/mattiasthalen/qlik-script-extractor/internal/extractor"
-	"github.com/mattiasthalen/qlik-script-extractor/internal/ui"
+	"github.com/mattiasthalen/qlik-parser/internal/extractor"
+	"github.com/mattiasthalen/qlik-parser/internal/ui"
 )
 
 func newExportCmd() *cobra.Command {

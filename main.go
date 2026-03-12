@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/mattiasthalen/qlik-script-extractor/cmd"
+	"github.com/mattiasthalen/qlik-parser/cmd"
 )
 
 func main() {

@@ -2,6 +2,6 @@
 # Real QlikView files (integration test fixtures, not for committing)
 internal/extractor/testdata/qlikview/
 *.qvf
-qlik-script-extractor
+qlik-parser
 coverage.out
 dist/
