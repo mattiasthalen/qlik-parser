@@ -118,14 +118,6 @@ pre code {
   font-size: 0.875rem;
 }
 
-pre.terminal {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-  overflow-x: auto;
-}
-
 pre.terminal code::before {
   content: "$ ";
   color: var(--text-subtle);
@@ -156,7 +148,7 @@ tr:nth-child(even) td {
   display: inline-block;
   padding: 10px 20px;
   background: var(--accent);
-  color: #0f172a;
+  color: var(--bg);
   font-weight: 600;
   border-radius: 6px;
   text-decoration: none;
@@ -177,7 +169,7 @@ tr:nth-child(even) td {
 
 .btn-outline:hover {
   background: var(--accent);
-  color: #0f172a;
+  color: var(--bg);
 }
 
 .hero {
