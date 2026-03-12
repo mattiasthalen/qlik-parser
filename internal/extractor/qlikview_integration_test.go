@@ -156,3 +156,80 @@ func TestQlikview_ExtractSucceeds_ExitCode0(t *testing.T) {
 		t.Errorf("expected 'Extracted 2 apps' in summary, got: %q", out)
 	}
 }
+
+func TestQlikview_ParseQVF_ArtifactCounts(t *testing.T) {
+	skipIfNoQlikviewFixtures(t)
+
+	path := filepath.Join(qlikviewTestdata, "Qlik_Sense_Content_Monitor.qvf")
+	data, err := extractor.ParseQVF(path)
+	if err != nil {
+		t.Fatalf("ParseQVF failed: %v", err)
+	}
+
+	if len(data.Measures) != 171 {
+		t.Errorf("expected 171 measures, got %d", len(data.Measures))
+	}
+	if len(data.Dimensions) != 78 {
+		t.Errorf("expected 78 dimensions, got %d", len(data.Dimensions))
+	}
+	if len(data.Variables) != 43 {
+		t.Errorf("expected 43 variables, got %d", len(data.Variables))
+	}
+}
+
+func TestQlikview_ParseQVF_SpotCheckMeasure(t *testing.T) {
+	skipIfNoQlikviewFixtures(t)
+
+	path := filepath.Join(qlikviewTestdata, "Qlik_Sense_Content_Monitor.qvf")
+	data, err := extractor.ParseQVF(path)
+	if err != nil {
+		t.Fatalf("ParseQVF failed: %v", err)
+	}
+
+	var sessions *extractor.Measure
+	for i := range data.Measures {
+		if data.Measures[i].Label == "Sessions" {
+			sessions = &data.Measures[i]
+			break
+		}
+	}
+	if sessions == nil {
+		t.Fatal("measure with label 'Sessions' not found")
+	}
+	if sessions.Def != "Count(DISTINCT SessionID)" {
+		t.Errorf("Sessions.Def = %q, want %q", sessions.Def, "Count(DISTINCT SessionID)")
+	}
+}
+
+func TestQlikview_QVW_NoJSONArtifacts(t *testing.T) {
+	skipIfNoQlikviewFixtures(t)
+
+	srcDir, _ := filepath.Abs(qlikviewTestdata)
+	outDir := t.TempDir()
+
+	root := cmd.NewRootCmd()
+	root.SetArgs([]string{"extract", "--source", srcDir, "--out", outDir})
+	buf := &bytes.Buffer{}
+	root.SetOut(buf)
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("extract failed: %v", err)
+	}
+
+	// The QVW output folder should contain only script.qvs, no JSON files.
+	qvwOutDir := filepath.Join(outDir, "Governance.Dashboard.2.1.4.qvw")
+	entries, err := os.ReadDir(qvwOutDir)
+	if err != nil {
+		t.Fatalf("output dir not found: %v", err)
+	}
+	for _, e := range entries {
+		if strings.HasSuffix(e.Name(), ".json") {
+			t.Errorf("unexpected JSON file in QVW output: %s", e.Name())
+		}
+	}
+	// Must have script.qvs
+	scriptPath := filepath.Join(qvwOutDir, "script.qvs")
+	if _, err := os.Stat(scriptPath); err != nil {
+		t.Errorf("script.qvs not found in QVW output dir: %v", err)
+	}
+}

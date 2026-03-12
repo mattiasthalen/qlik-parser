@@ -1,0 +1,708 @@
+[
+  {
+    "id": "1d2e3d5b-8002-4305-85c1-223f6b634751",
+    "label": "Data Connection String",
+    "fields": [
+      "DataConnectionString"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "1ea21cad-fdc4-4dd2-a607-82ec23739b53",
+    "label": "Stream Name",
+    "fields": [
+      "StreamName"
+    ],
+    "tags": [],
+    "description": "Stream to which app was published."
+  },
+  {
+    "id": "302103d0-76a0-4b28-adb5-a6772dd9f13f",
+    "label": "App Contains Synthetic Keys",
+    "fields": [
+      "AppContainsSyntheticKeys"
+    ],
+    "tags": [],
+    "description": "Indicates if an app's data model contains one or more synthetic keys.\nA synthetic key is created when two or more fields are found in two or more tables within an app data model."
+  },
+  {
+    "id": "38e85aea-6109-4979-9b51-5caea76a3fe2",
+    "label": "Table is Island",
+    "fields": [
+      "TableIsIsland"
+    ],
+    "tags": [],
+    "description": "Indicates if a table is associated with any other table within app data model."
+  },
+  {
+    "id": "4ab6a640-cea6-41ce-ada8-3d2c6f691885",
+    "label": "Folder Connection Dir",
+    "fields": [
+      "FolderConnectionDir"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "623c0552-3bbd-4cb1-b909-1781522d408b",
+    "label": "Folder Connection File Type",
+    "fields": [
+      "FolderConnectionFileType"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "78cb756b-9252-4c51-bd92-4631a64dcc99",
+    "label": "Data Connection Type",
+    "fields": [
+      "DataConnectionType"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ADjPdh",
+    "label": "Session Start Week Start",
+    "fields": [
+      "Session Start Week Start"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "BMUmnR",
+    "label": "Task Name",
+    "fields": [
+      "TaskName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "CTgdhS",
+    "label": "File Ext.",
+    "fields": [
+      "FolderConnectionFileType"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "DUzVJmb",
+    "label": "Reload CPU Time (ms)",
+    "fields": [
+      "App Reload CPU Time (ms)"
+    ],
+    "tags": [],
+    "description": "Engine CPU time spent during last app reload, given in milliseconds (ms). Note: this is not the same as Reload Duration reported in other Monitor Apps, but is specific to the time that the engine spent to reload the app."
+  },
+  {
+    "id": "DWWVJMe",
+    "label": "Field Name",
+    "fields": [
+      "FieldNameUnique"
+    ],
+    "tags": [],
+    "description": "Unique to each app and table"
+  },
+  {
+    "id": "FkKW",
+    "label": "Folder Connection File",
+    "fields": [
+      "FolderConnectionFile"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "GXFwxt",
+    "label": "Task Execution Date",
+    "fields": [
+      "Task Execution Start Month",
+      "Task Execution Start Date"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "GrzjQ",
+    "label": "Task Execution Start Week",
+    "fields": [
+      "Task Execution Start Week"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "HnrQVrK",
+    "label": "Task Execution Concurrency Minute",
+    "fields": [
+      "TaskExecutionConcurrencyMinute"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JNemY",
+    "label": "Duration (hh:mm:ss)",
+    "fields": [
+      "=Interval(TaskExecutionDuration/24/60/60/1000, 'hh:mm:ss')"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JcpxjU",
+    "label": "Archived Log File Node",
+    "fields": [
+      "ArchivedLogFileNode"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JdPYPG",
+    "label": "Field Name",
+    "fields": [
+      "FieldNameUnique"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "Jqnkt",
+    "label": "Table Name",
+    "fields": [
+      "TableName"
+    ],
+    "tags": [],
+    "description": "Table within app data model."
+  },
+  {
+    "id": "JzPBkjp",
+    "label": "Has Section Access",
+    "fields": [
+      "=If(Len([Has Section Access]), [Has Section Access], 'False')"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "LpRTwgN",
+    "label": "App Name",
+    "fields": [
+      "AppName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "LpV",
+    "label": "Last Reload Date",
+    "fields": [
+      "AppLastReloadDate"
+    ],
+    "tags": [],
+    "description": "Date when the app was last reloaded"
+  },
+  {
+    "id": "MHeec",
+    "label": "App/Table",
+    "fields": [
+      "AppNameUnique",
+      "TableNameUnique"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "NfJjX",
+    "label": "Queuing Time",
+    "fields": [
+      "TaskExecutionQueuingTime"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "NjDrzrK",
+    "label": "File Last Modified",
+    "fields": [
+      "=Timestamp(FolderConnectionFileLastModifiedTime,'YYYY/MM/DD hh:mm:ss')"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PKE",
+    "label": "Task Execution Start Month",
+    "fields": [
+      "Task Execution Start Month"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PKQApP",
+    "label": "Service",
+    "fields": [
+      "ArchivedLogFileServiceType"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PWeKTY",
+    "label": "User",
+    "fields": [
+      "User"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "QQqdwXS",
+    "label": "App is Published",
+    "fields": [
+      "AppPublished"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "QZaRcgP",
+    "label": "Field Name",
+    "fields": [
+      "FieldName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "QnDejYm",
+    "label": "Last Reloaded (Timestamp)",
+    "fields": [
+      "AppLastReloadTime"
+    ],
+    "tags": [],
+    "description": "Timestamp when app was last reloaded."
+  },
+  {
+    "id": "QnjYgj",
+    "label": "Site Name",
+    "fields": [
+      "SiteName"
+    ],
+    "tags": [],
+    "description": "Only relevant for multi-site analysis."
+  },
+  {
+    "id": "RJHTvXD",
+    "label": "AppID",
+    "fields": [
+      "AppID"
+    ],
+    "tags": [],
+    "description": "App ID as reported in QMC"
+  },
+  {
+    "id": "RjFG",
+    "label": "Last Session Date",
+    "fields": [
+      "Session Start Date Max"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "SpPqzE",
+    "label": "Execution Node",
+    "fields": [
+      "TaskExecutionNodeName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "SyYjW",
+    "label": "Duration (30 min tranches)",
+    "fields": [
+      "=Interval(RangeMin(1, 0 + (30*Ceil(TaskExecutionDuration/1000/60/30, 1)/(60*24))), 'hh:mm')"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "TgtUBPj",
+    "label": "Last Reloaded",
+    "fields": [
+      "AppLastReloadedBucket"
+    ],
+    "tags": [],
+    "description": "Buckets of time when app was last reloaded"
+  },
+  {
+    "id": "TrCwkD",
+    "label": "Concurrency Minute",
+    "fields": [
+      "ConcurrencyMinute"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "Ubyjm",
+    "label": "App/Table/Field",
+    "fields": [
+      "AppNameUnique",
+      "TableNameUnique",
+      "FieldNameUnique"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "VwKdJay",
+    "label": "ODBC Connector Package Driver",
+    "fields": [
+      "ODBCConnectorPackageDriver"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "WBVYQd",
+    "label": "Session Timeframe",
+    "fields": [
+      "Session Timeframe"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "Wbcvv",
+    "label": "End Time",
+    "fields": [
+      "=Timestamp(TaskExecutionEndTime)"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "WmgfF",
+    "label": "Data Connection Name",
+    "fields": [
+      "DataConnectionName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "XjSDQjq",
+    "label": "App Owner UserID",
+    "fields": [
+      "AppOwnerUserID"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "XjvvvDd",
+    "label": "Start Time",
+    "fields": [
+      "=Timestamp(TaskExecutionStartTime)"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "YmHsPW",
+    "label": "Saving Time",
+    "fields": [
+      "TaskExecutionSavingTime"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ZJjue",
+    "label": "Field is Synthetic",
+    "fields": [
+      "FieldIsSynthetic"
+    ],
+    "tags": [],
+    "description": "Indicates if a field is part of a synthetic key.\nA synthetic key is created when two or more fields are found in two or more tables within an app data model.\nNote that Synthetic Fields will be listed as having 0 field records. Please rely on the field cardinality to understand the volume of records for these synthetic fields."
+  },
+  {
+    "id": "aQEE",
+    "label": "Node Hostname",
+    "fields": [
+      "NodeHostname"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ac6685a9-1c3e-4f6c-bd17-9e627aaa91a9",
+    "label": "App Reloaded In June2018 Plus",
+    "fields": [
+      "AppReloadedBeyondCutoffDate"
+    ],
+    "tags": [],
+    "description": "Was the Sense app reloaded using June 2018 Sense or later? If not, we will not have proper metadata for it."
+  },
+  {
+    "id": "b1075397-f3d7-4fe4-8c4b-c2ceaeeb5608",
+    "label": "Table Name (Unique)",
+    "fields": [
+      "TableNameUnique"
+    ],
+    "tags": [],
+    "description": "Unique table name within each app (to distinguish tables with same name but from different apps.)"
+  },
+  {
+    "id": "bLWCje",
+    "label": "Duration",
+    "fields": [
+      "=Time([Session Duration], 'hh:mm')"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "eegpsdy",
+    "label": "Execution Start Month",
+    "fields": [
+      "Task Execution Start Month"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "enuGzF",
+    "label": "App Last Accessed Timeframe",
+    "fields": [
+      "App Last Accessed"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "fEJPpj",
+    "label": "Folder",
+    "fields": [
+      "ArchivedLogFileFolder"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "fe0d6c30-0942-4bb7-9217-9e83ffca5786",
+    "label": "App Owner",
+    "fields": [
+      "AppOwnerName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "gKmEdSK",
+    "label": "File Has Lineage Match",
+    "fields": [
+      "FolderConnectionFileMatchFound"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "gvPmNN",
+    "label": "Task Execution Timeframe",
+    "fields": [
+      "Task Execution Timeframe"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "hPbPUH",
+    "label": "File Has Likely Duplicate",
+    "fields": [
+      "FolderConnectionFileHasLikelyDuplicate"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "jjyDtj",
+    "label": "File Type",
+    "fields": [
+      "ArchivedLogFileType"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "kTMQPD",
+    "label": "End Time",
+    "fields": [
+      "Session End Time"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "kaPGg",
+    "label": "Execution Start Date",
+    "fields": [
+      "Task Execution Start Date"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "kqJkLD",
+    "label": "FolderConnectionFileAdditionalCopies",
+    "fields": [
+      "FolderConnectionFileAdditionalCopies"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "mGMt",
+    "label": "Folder Connection Data Connection Name",
+    "fields": [
+      "=FolderConnectionDataConnectionName"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "myVxvR",
+    "label": "App Last Reloaded Timeframe",
+    "fields": [
+      "App Last Reloaded"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "pbcfKp",
+    "label": "App Contains Data Island(s)",
+    "fields": [
+      "AppContainsDataIsland(s)"
+    ],
+    "tags": [],
+    "description": "Indicates if an app contains one or more island tables in the data model.\nAn island table is one which does not share any common field with another table and, therefore, is not associated with other data tables."
+  },
+  {
+    "id": "pzpQQ",
+    "label": "Start Time",
+    "fields": [
+      "Session Start Time"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "sNYWdS",
+    "label": "Message Month",
+    "fields": [
+      "Message Month"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "urnesb",
+    "label": "Script Time",
+    "fields": [
+      "TaskExecutionScriptTime"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "utZQaT",
+    "label": "File Last Modified Timeframe",
+    "fields": [
+      "=FolderConnectionFileLastModifiedTimeframe"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "wZmUzP",
+    "label": "Task Execution Status",
+    "fields": [
+      "TaskExecutionStatus"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "xdLfma",
+    "label": "App Name (Unique)",
+    "fields": [
+      "AppNameUnique"
+    ],
+    "tags": [],
+    "description": "Unique to each AppId (to distinguish apps with same name)"
+  },
+  {
+    "id": "yqXsXS",
+    "label": "Table Contains Synthetic Keys",
+    "fields": [
+      "TableContainsSyntheticKeys"
+    ],
+    "tags": [],
+    "description": "Indicates if a table within an app data model contains one or more synthetic keys.\nA synthetic key is created when two or more fields are found in two or more tables within an app data model."
+  },
+  {
+    "id": "zhRWmWp",
+    "label": "Month",
+    "fields": [
+      "ArchivedLogFileDate"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "zjkgD",
+    "label": "Session Hostname",
+    "fields": [
+      "Session Hostname"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "cECv",
+    "label": "Task Execution Success Indicator",
+    "fields": [
+      "=[Task Execution Success Indicator]"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "DmEPWMT",
+    "label": "Enabled",
+    "fields": [
+      "TaskEnabled"
+    ],
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "RpCVHK",
+    "label": "Task Event Name",
+    "fields": [
+      "TaskEventName"
+    ],
+    "tags": [],
+    "description": ""
+  }
+]
