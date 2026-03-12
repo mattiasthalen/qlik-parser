@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -19,15 +20,28 @@ func newExtractCmd() *cobra.Command {
 	var outDir string
 	var dryRun bool
 	var script bool
+	var measures bool
+	var dimensions bool
+	var variables bool
 
 	cmd := &cobra.Command{
 		Use:   "extract",
 		Short: "Extract artifacts from .qvw and .qvf files",
 		Long: `Recursively scans --source for .qvw and .qvf files and extracts embedded
-artifacts to text files alongside or under --out.`,
+artifacts to a per-file folder alongside or under --out.`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if !script { // expand to: if !script && !variables && !charts as flags are added
+			anyChanged := cmd.Flags().Changed("script") ||
+				cmd.Flags().Changed("measures") ||
+				cmd.Flags().Changed("dimensions") ||
+				cmd.Flags().Changed("variables")
+			extractAll := !anyChanged
+			doScript := extractAll || script
+			doMeasures := extractAll || measures
+			doDimensions := extractAll || dimensions
+			doVariables := extractAll || variables
+
+			if anyChanged && !doScript && !doMeasures && !doDimensions && !doVariables {
 				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "error: no artifact type selected\n")
 				return ExitError(1)
 			}
@@ -67,62 +81,116 @@ artifacts to text files alongside or under --out.`,
 
 			hasErr := false
 
-			for i, qvwPath := range qlikPaths {
+			for i, srcPath := range qlikPaths {
 				printer.UpdateSpinner(i+1, len(qlikPaths))
 
-				relPath, err := filepath.Rel(sourceDir, qvwPath)
+				relPath, err := filepath.Rel(sourceDir, srcPath)
 				if err != nil {
-					relPath = filepath.Base(qvwPath)
+					relPath = filepath.Base(srcPath)
 				}
 
-				var scriptContent string
-				var extractErr error
-				if filepath.Ext(qvwPath) == ".qvf" {
-					scriptContent, extractErr = extractor.ExtractScriptFromQVF(qvwPath)
-				} else {
-					scriptContent, extractErr = extractor.ExtractScript(qvwPath)
-				}
-				if extractErr != nil {
-					var noScript *extractor.NoScriptError
-					if errors.As(extractErr, &noScript) {
+				isQVF := filepath.Ext(srcPath) == ".qvf"
+
+				// Build the artifact slice.
+				var artifacts []extractor.Artifact
+
+				if isQVF {
+					qvfData, parseErr := extractor.ParseQVF(srcPath)
+					if parseErr != nil {
+						hasErr = true
 						printer.ClearSpinner()
+						errMsg := parseErr.Error()
+						if after, ok := strings.CutPrefix(errMsg, srcPath+": "); ok {
+							errMsg = after
+						}
 						printer.FileResult(ui.Result{
-							Status:  ui.StatusWarn,
+							Status:  ui.StatusErr,
 							SrcPath: relPath,
-							Message: "no script found",
+							Message: errMsg,
 						})
 						continue
 					}
-					hasErr = true
-					printer.ClearSpinner()
-					errMsg := extractErr.Error()
-					if after, ok := strings.CutPrefix(errMsg, qvwPath+": "); ok {
-						errMsg = after
+
+					if doScript && qvfData.Script != "" {
+						artifacts = append(artifacts, extractor.Artifact{
+							Name:    "script.qvs",
+							Content: []byte(qvfData.Script),
+						})
 					}
+					if doMeasures {
+						b, _ := json.MarshalIndent(qvfData.Measures, "", "  ")
+						artifacts = append(artifacts, extractor.Artifact{Name: "measures.json", Content: b})
+					}
+					if doDimensions {
+						b, _ := json.MarshalIndent(qvfData.Dimensions, "", "  ")
+						artifacts = append(artifacts, extractor.Artifact{Name: "dimensions.json", Content: b})
+					}
+					if doVariables {
+						b, _ := json.MarshalIndent(qvfData.Variables, "", "  ")
+						artifacts = append(artifacts, extractor.Artifact{Name: "variables.json", Content: b})
+					}
+				} else {
+					// QVW: script only
+					if doScript {
+						scriptContent, extractErr := extractor.ExtractScript(srcPath)
+						if extractErr != nil {
+							var noScript *extractor.NoScriptError
+							if errors.As(extractErr, &noScript) {
+								printer.ClearSpinner()
+								printer.FileResult(ui.Result{
+									Status:  ui.StatusWarn,
+									SrcPath: relPath,
+									Message: "no script found",
+								})
+								continue
+							}
+							hasErr = true
+							printer.ClearSpinner()
+							errMsg := extractErr.Error()
+							if after, ok := strings.CutPrefix(errMsg, srcPath+": "); ok {
+								errMsg = after
+							}
+							printer.FileResult(ui.Result{
+								Status:  ui.StatusErr,
+								SrcPath: relPath,
+								Message: errMsg,
+							})
+							continue
+						}
+						artifacts = append(artifacts, extractor.Artifact{
+							Name:    "script.qvs",
+							Content: []byte(scriptContent),
+						})
+					}
+				}
+
+				if len(artifacts) == 0 {
+					printer.ClearSpinner()
 					printer.FileResult(ui.Result{
-						Status:  ui.StatusErr,
+						Status:  ui.StatusWarn,
 						SrcPath: relPath,
-						Message: errMsg,
+						Message: "no script found",
 					})
 					continue
 				}
 
-				outDirPath := extractor.ResolveOutputDir(qvwPath, sourceDir, outDir)
-				relOutDir, err := filepath.Rel(sourceDir, outDirPath)
+				resolvedOutDir := extractor.ResolveOutputDir(srcPath, sourceDir, outDir)
+				relOut, err := filepath.Rel(sourceDir, resolvedOutDir)
 				if err != nil {
-					relOutDir = filepath.Base(outDirPath)
+					relOut = filepath.Base(resolvedOutDir)
 				}
 				if outDir != "" && outDir != sourceDir {
-					if r, err := filepath.Rel(outDir, outDirPath); err == nil {
-						relOutDir = r
+					if r, err := filepath.Rel(outDir, resolvedOutDir); err == nil {
+						relOut = r
 					}
 				}
-				artifactName := "script.qvs"
 
-				artifacts := []extractor.Artifact{
-					{Name: artifactName, Content: []byte(scriptContent)},
+				fileNames := make([]string, len(artifacts))
+				for j, a := range artifacts {
+					fileNames[j] = a.Name
 				}
-				writeErr := extractor.WriteArtifacts(outDirPath, artifacts, dryRun)
+
+				writeErr := extractor.WriteArtifacts(resolvedOutDir, artifacts, dryRun)
 				if writeErr != nil {
 					hasErr = true
 					printer.ClearSpinner()
@@ -138,8 +206,8 @@ artifacts to text files alongside or under --out.`,
 				printer.FileResult(ui.Result{
 					Status:  ui.StatusOK,
 					SrcPath: relPath,
-					OutDir:  relOutDir,
-					Files:   []string{artifactName},
+					OutDir:  relOut,
+					Files:   fileNames,
 				})
 			}
 
@@ -153,9 +221,12 @@ artifacts to text files alongside or under --out.`,
 	}
 
 	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw and .qvf files (default: current directory)")
-	cmd.Flags().StringVarP(&outDir, "out", "o", "", "Export directory (default: alongside .qvw files)")
+	cmd.Flags().StringVarP(&outDir, "out", "o", "", "Export directory (default: alongside source files)")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be extracted without writing files")
-	cmd.Flags().BoolVar(&script, "script", true, "Extract load scripts")
+	cmd.Flags().BoolVar(&script, "script", false, "Extract load scripts")
+	cmd.Flags().BoolVar(&measures, "measures", false, "Extract master measures (QVF only)")
+	cmd.Flags().BoolVar(&dimensions, "dimensions", false, "Extract master dimensions (QVF only)")
+	cmd.Flags().BoolVar(&variables, "variables", false, "Extract variables (QVF only)")
 
 	cmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
 		_, _ = fmt.Fprintf(c.ErrOrStderr(), "error: %v\n", err)
