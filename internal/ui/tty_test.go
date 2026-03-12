@@ -12,8 +12,8 @@ func TestIsTTY_NonTTY(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.Remove(f.Name())
-	defer f.Close()
+	defer func() { _ = os.Remove(f.Name()) }()
+	defer func() { _ = f.Close() }()
 
 	if ui.IsTTY(f) {
 		t.Error("expected regular file to not be a TTY")
