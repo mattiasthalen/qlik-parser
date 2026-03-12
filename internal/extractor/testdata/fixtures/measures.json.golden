@@ -1,0 +1,1199 @@
+[
+  {
+    "id": "0cb7baab-b5a0-4401-a022-ea4d5702b05f",
+    "label": "Avg. Sessions per Day",
+    "def": "Avg(Aggr(Count(DISTINCT SessionID), [Session Start Date]))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "1c4cda56-09fd-4da1-a9a9-d37b33ac9b42",
+    "label": "Task Executions (Last 90 Days)",
+    "def": "Count({\u003c[App Last Reloaded]={'Last 90 Days'}\u003e} distinct TaskID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "1c7f0263-0b80-4298-bd48-1c0184c06ad6",
+    "label": "Avg. Saving Minutes",
+    "def": "Interval(Avg(TaskExecutionSavingTime), 'm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "25e6a117-6f50-4998-be4e-04a04b405634",
+    "label": "App Consumers (Last X)",
+    "def": "Count(DISTINCT UserID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "260119ad-35d6-4cf9-8fc5-69cf5be1a9ab",
+    "label": "Apps",
+    "def": "Num(Count({\u003cAppReloadedBeyondCutoffDate={1}\u003e}DISTINCT AppID),'#,##0')",
+    "tags": [],
+    "description": "Apps which were reloaded using June 2018 or later and, therefore, have metadata available."
+  },
+  {
+    "id": "28fd9f54-9e0c-4983-a0a5-fbd982e4b744",
+    "label": "Avg App RAM Footprint (GB)",
+    "def": "Num(Avg(AppRAM_GB),'#,##0.0#')",
+    "tags": [],
+    "description": "(Average) The memory footprint of an app when reloaded. \nNote that in practice, this is the baseline memory consumed by an app. As users make selections and navigate the app, additional memory will be cached by the app."
+  },
+  {
+    "id": "2bb6cfcf-3e0a-4382-85f6-a238f0aa28bb",
+    "label": "% Finished Fail",
+    "def": "[Finished Fail]/[Task Executions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "3d32083e-0246-4dc1-8a34-5470af1ad78b",
+    "label": "% Reloaded in Last 90 Days",
+    "def": "[Reloaded in Last 90 Days]/Apps",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "41a0824a-2119-4876-a389-cc5ad705933c",
+    "label": "Task Execution Success Rate",
+    "def": "[Finished Success]/[Task Executions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "444019fb-85f2-4bd2-a4e1-b657fbaf2492",
+    "label": "Skipped",
+    "def": "Sum(TaskExecutionStatusSkippedd)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "55e59694-da62-423a-9ad8-b4890fcb9b26",
+    "label": "Max Task Executions per Day (1)",
+    "def": "Avg(\r\n  Aggr(\n\tCount(TaskExecutionId),\n    AppID,\n    [Task Execution Start Date]\n  )\n) \u0026 ''",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "5ac4175e-ac72-475c-a8a4-df57e474cbf4",
+    "label": "Reloaded",
+    "def": "Count({\u003cTaskExecutionCounter={1}\u003e} distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "65caf07e-e4db-4922-9325-c8456af5d6e2",
+    "label": "% Tasks Executed in Last 90 Days",
+    "def": "Count({\u003c[App Last Reloaded]={'Last 90 Days'}\u003e} distinct TaskID)/Tasks",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "6c2043e9-bbe1-4d48-b4d5-b0cad7a4f9d5",
+    "label": "Avg. Concurrent Task Executions",
+    "def": "Avg(\tAggr(\t\tCount({\u003cTaskExecutionConcurrencyMinute={*}\u003e}DISTINCT TaskExecutionId),        TaskExecutionConcurrencyMinute    ))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "6e0a88f9-bc7b-4c6f-a972-8ed5717738d1",
+    "label": "% Accessed",
+    "def": "[Accessed]/Count(distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "74fa8df5-09c4-4eb4-9b7f-dee61256ad94",
+    "label": "% Skipped",
+    "def": "[Skipped]/[Task Executions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "7be61df2-08e8-4eb3-a26f-7a9b59afbbf1",
+    "label": "Avg. Concurrent Task Execution Peak Reload RAM (GB) (1)",
+    "def": "Round(  Alt(Avg(    Aggr(        Sum({\u003cTaskExecutionConcurrencyMinute={\"*\"}\u003e} AppRAMPeakReload_Byte),        TaskExecutionConcurrencyMinute    )  )/1024/1024/1024,0),.01)//$(vMaxConcurrentPeakReloadRAM)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "7db28cbe-39e6-4c80-a9ac-b3e431694a01",
+    "label": "% Unpublished Apps",
+    "def": "Unpublished/Count(distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "8987f178-b426-4b9d-b808-5af5b44e914e",
+    "label": "Files (with duplicates)",
+    "def": "Sum(FolderConnectionFileCounter)",
+    "tags": [],
+    "description": "Count of files scanned without duplicate handling."
+  },
+  {
+    "id": "8cadd565-4493-4214-9718-90148b3f4dbc",
+    "label": "Table # of Fields",
+    "def": "Num(Sum([Table Total # of Fields]),'#,##0')",
+    "tags": [],
+    "description": "Count of fields per table, excluding system fields."
+  },
+  {
+    "id": "8f456605-6195-450e-8f71-a69830597f3e",
+    "label": "Apps",
+    "def": "Count(distinct AppID)",
+    "tags": [],
+    "description": "Total count of Apps"
+  },
+  {
+    "id": "92f35540-bc77-473a-9c37-7a9789193000",
+    "label": "Total Storage (GB)",
+    "def": "Sum(FolderConnectionFileSizeBytes) / 1024 / 1024 / 1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "95af89c3-01e5-4604-a64e-eb7815a12456",
+    "label": "% Aborted",
+    "def": "[Aborted]/[Task Executions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "9e58ed75-f183-4627-b701-8cfe7b3d3a39",
+    "label": "Users (Last 90 Days)",
+    "def": "Count({\u003c[Session in Last 90 Days]={1}\u003e}DISTINCT User)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "BBXTLg",
+    "label": "Estimated Peak Reload RAM (GB)",
+    "def": "If($(vu_multi_site_enabled)=1,\r\nSum(\n      Aggr(\n          Sum({\u003cTaskExecutionConcurrencyMinute={\"*\"}\u003e} AppRAMPeakReload_Byte),\n          TaskExecutionConcurrencyMinute,SiteName\n      )\n    )/1024/1024/1024,\n    Sum(\n      Aggr(\n          Sum({\u003cTaskExecutionConcurrencyMinute={\"*\"}\u003e} AppRAMPeakReload_Byte),\n          TaskExecutionConcurrencyMinute\n      )\n    )/1024/1024/1024\n)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "CbPAQh",
+    "label": "Presumed Duplicates",
+    "def": "[Files (with duplicates)] - [Files (no duplicates)] ",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "DFeXkd",
+    "label": "# Tables",
+    "def": "Num(Count(DISTINCT TableID),'#,##0')",
+    "tags": [],
+    "description": "Excluding system tables."
+  },
+  {
+    "id": "DYGWR",
+    "label": "Concurrent Task Executions",
+    "def": "Count(distinct TaskExecutionId)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "DeGbpNA",
+    "label": "# Fields",
+    "def": "Num(Count(DISTINCT FieldID),'#,##0')",
+    "tags": [],
+    "description": "Count of unique fields within apps, excluding system fields."
+  },
+  {
+    "id": "EHphN",
+    "label": "Sessions",
+    "def": "Count(DISTINCT SessionID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "EjYee",
+    "label": "Apps with Sessions",
+    "def": "Accessed",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "FKqtAjG",
+    "label": "File/RAM Ratio",
+    "def": "Sum(RAM_FileSizeRatio)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "FXpPwES",
+    "label": "Users",
+    "def": "Count(DISTINCT User)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "GDGyMU",
+    "label": "Newest Log File Date",
+    "def": "Max(MonthName(ArchivedLogFileDate))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "GjPahx",
+    "label": "vSessionLogDaysBack",
+    "def": "'$(vSessionLogDaysBack)'",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "GjjF",
+    "label": "File Size (GB)",
+    "def": "Sum(MaxFolderConnectionFileSizeBytes) / 1024 / 1024 / 1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "HEyBcjM",
+    "label": "Total Session Time (hh:mm)",
+    "def": "Sum([Session Duration])",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JKhXatm",
+    "label": "Max Concurrent Apps",
+    "def": "Max(\r\n\tAggr(\n\t\tCount(DISTINCT {\u003cConcurrencyMinute={*},SaaSTierNum={2},AppRequiresLargeAppsForConsume={'Yes'}\u003e}AppID),\n        ConcurrencyMinute\n    )\n)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JSsWEb",
+    "label": "Task Events Enabled",
+    "def": "Count({\u003cTaskEventEnabled={'True'}\u003e}DISTINCT TaskEventID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JcGJzn",
+    "label": "Oldest Log File Date",
+    "def": "Min(ArchivedLogFileDate)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JjUDmNW",
+    "label": "Warning Message Types",
+    "def": "[Warning Message Types]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JkeFTe",
+    "label": "Finished Success",
+    "def": "Sum(TaskExecutionStatusFinishedSuccess)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "JusJTY",
+    "label": "Reloads over 3h",
+    "def": "Count({\u003c[=Interval(TaskExecutionDuration/24/60/60/1000,'hh:mm:ss')]={\"\u003e03:00:00\"}\u003e} Distinct TaskExecutionId)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "LjnbC",
+    "label": "Tasks with Events",
+    "def": "Count({\u003cTaskHasEvents={'True'}\u003e} DISTINCT TaskID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "LyyD",
+    "label": "Synthetic Fields",
+    "def": "Num(Count({\u003cFieldIsSynthetic={\"\u003e0\"}\u003e}DISTINCT FieldID),'#,##0')",
+    "tags": [],
+    "description": "Fields which are common across more than one table, thus creating a synthetic key."
+  },
+  {
+    "id": "MNXqwq",
+    "label": "# Field Records",
+    "def": "Num(Sum(FieldTotalCount),'#,##0')",
+    "tags": [],
+    "description": "Count of records within a field in a table in an app, excluding system fields.\nNote that synthetic key fields will report # Field Records = 0. Please use Field Cardinality for these fields."
+  },
+  {
+    "id": "MmPwnGq",
+    "label": "Days Since Last Reload",
+    "def": "Num(Today(1)-Date,'#,##0')",
+    "tags": [],
+    "description": "How many days since the last reload of this app?"
+  },
+  {
+    "id": "NLtxpx",
+    "label": "Task AppID",
+    "def": "Count(distinct TaskAppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "NRJqDL",
+    "label": "Task Children",
+    "def": "Count({\u003cTaskChildID1={\"=Len(TaskChildID1)\u003e=1\"}\u003e}DISTINCT TaskChildID1) \r\n+ Count({\u003cTaskChildID2={\"=Len(TaskChildID1)\u003e=2\"}\u003e}DISTINCT TaskChildID2) \n+ Count({\u003cTaskChildID3={\"=Len(TaskChildID3)\u003e=1\"}\u003e}DISTINCT TaskChildID3) \n+ Count({\u003cTaskChildID4={\"=Len(TaskChildID4)\u003e=1\"}\u003e}DISTINCT TaskChildID4) \n+ Count({\u003cTaskChildID5={\"=Len(TaskChildID5)\u003e=1\"}\u003e}DISTINCT TaskChildID5)\n+ Count({\u003cTaskChildID6={\"=Len(TaskChildID6)\u003e=1\"}\u003e}DISTINCT TaskChildID6) \n+ Count({\u003cTaskChildID7={\"=Len(TaskChildID7)\u003e=1\"}\u003e}DISTINCT TaskChildID7) \n+ Count({\u003cTaskChildID8={\"=Len(TaskChildID8)\u003e=1\"}\u003e}DISTINCT TaskChildID8) \n+ Count({\u003cTaskChildID9={\"=Len(TaskChildID9)\u003e=1\"}\u003e}DISTINCT TaskChildID9) \n+ Count({\u003cTaskChildID10={\"=Len(TaskChildID10)\u003e=1\"}\u003e}DISTINCT TaskChildID10)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "NYGHKEj",
+    "label": "Avg. Session Duration (hh:mm)",
+    "def": "Time(Avg([Session Duration]))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PFGFCVn",
+    "label": "Archived Log Files",
+    "def": "Sum(ArchivedLogFileCount)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PJFwkC",
+    "label": "Max Concurrent",
+    "def": "Max(\r\n\tAggr(\n\t\tCount({\u003cTaskExecutionConcurrencyMinute={*}\u003e}DISTINCT TaskExecutionId),\n        TaskExecutionConcurrencyMinute\n    )\n)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PJjQHd",
+    "label": "Published",
+    "def": "Count({\u003cAppPublished={'Published'}\u003e} distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PNzUWe",
+    "label": "Avg. Daily Sessions",
+    "def": "Avg(Aggr([Sessions], [Session Start Date]))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PSEEmE",
+    "label": "Folder Scan Date",
+    "def": "Timestamp(Max(FolderScanTime))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "PmpKKKA",
+    "label": "Max Task Executions per Day",
+    "def": "Max(\r\n  Aggr(\n\tCount(TaskExecutionId),\n    AppID,\n    [Task Execution Start Date]\n  )\n) \u0026 ''",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "QKkunQj",
+    "label": "Field RAM Footprint (MB)",
+    "def": "Num(Sum(FieldSize_MB),'#,##0')",
+    "tags": [],
+    "description": "Initial memory consumed by a field within an during reload.\nIn aggregate, this total Field RAM footprint might be larger than the total App RAM footprint due to fields existing on more than one table.\n(Measure shading / coloring relative to the max value found for this measure in your current selections.)"
+  },
+  {
+    "id": "QPcGc",
+    "label": "Error Message Types",
+    "def": "[Error Message Types]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "QQjzHQB",
+    "label": "Total Peak Reload RAM (GB)",
+    "def": "Sum(AppRAMPeakReload_GB)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "QSBYnFD",
+    "label": "% Accessed in Last 90 Days",
+    "def": "[Accessed in Last 90 Days]/Count(distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "RZwdzyF",
+    "label": "Max Concurrent Tasks",
+    "def": "Max(\r\n\tAggr(\n\t\tCount({\u003cTaskExecutionConcurrencyMinute={*},AppRequiresLargeAppsForReload={'Yes'}\u003e}DISTINCT TaskExecutionId),\n        TaskExecutionConcurrencyMinute\n    )\n)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "SRFc",
+    "label": "Max Concurrent Users",
+    "def": "Max(\r\n  Aggr(\n      Count({\u003cConcurrencyMinute={*}\u003e}DISTINCT User),\n      AppID,\n      ConcurrencyMinute\n  )\n) \u0026 ''",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "SkFZR",
+    "label": "Avg RAM to File Size Ratio",
+    "def": "Num(Avg(RAM_FileSizeRatio),'0.0')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "SsuvhZ",
+    "label": "Reloads over 3h Rate",
+    "def": "[Reloads over 3h]/[Task Executions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "TMkjfM",
+    "label": "Apps Contain Data Island(s)",
+    "def": "Count({\u003c[AppContainsDataIsland(s)]={1}\u003e}DISTINCT AppID)",
+    "tags": [],
+    "description": "Count of apps which contain one or more island tables in the data model.\nAn island table is one which does not share any common field with another table and, therefore, is not associated with other data tables."
+  },
+  {
+    "id": "VLyj",
+    "label": "Task Parents",
+    "def": "Count({\u003cIsTaskRoot={1}\u003e}DISTINCT TaskID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "VMycw",
+    "label": "Avg Sessions per User (Last X Days)",
+    "def": "Alt(Sum(AppTotalSessionCount) / Sum(AppTotalDistinctUsers),0)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "VPtdHP",
+    "label": "Max Concurrent Peak Reload RAM (GB)",
+    "def": "$(vMaxConcurrentPeakReloadRAM)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "VSbKvu",
+    "label": "Aborted",
+    "def": "Sum(TaskExecutionStatusAborted)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "VhnGXk",
+    "label": "Tasks with Executions",
+    "def": "Count(DISTINCT TaskExecutionTaskID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "Vrpke",
+    "label": "File Size (no duplicates)",
+    "def": "Sum(MaxFolderConnectionFileSizeBytes) / 1024 / 1024 / 1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "WQFmS",
+    "label": "Errors",
+    "def": "Sum(ErrorCounter)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "Wcvuyz",
+    "label": "Max Concurrent Task Execution Peak Reload RAM (GB)",
+    "def": "\r\nRound(\n  Alt(Max(\n    Aggr(\n        Sum({\u003cTaskExecutionConcurrencyMinute={\"*\"}\u003e} AppRAMPeakReload_Byte),\n        TaskExecutionConcurrencyMinute\n    )\n  )/1024/1024/1024,0)\n,.01)\n\n//$(vMaxConcurrentPeakReloadRAM)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "WhhmKp",
+    "label": "Avg File Size (GB)",
+    "def": "Avg(MaxFolderConnectionFileSizeBytes) / 1024 / 1024 / 1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "WnBPS",
+    "label": "Task Events",
+    "def": "Count(DISTINCT TaskEventID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "XJTmss",
+    "label": "Sessions (Last X Days)",
+    "def": "Sum(AppTotalSessionCount)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "XLGbrd",
+    "label": "Total Table RAM Footprint (MB)",
+    "def": "Num(Sum(TableSize_MB),'#,##0')",
+    "tags": [],
+    "description": "Net impact to RAM for a table in an app.\n(Measure shading / coloring relative to the max value found for this measure in your current selections.)"
+  },
+  {
+    "id": "XUMPSEB",
+    "label": "Last Restart",
+    "def": "Max(LastRestart)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ZDPqZrJ",
+    "label": "Task Execution Nodes",
+    "def": "Count(distinct TaskExecutionNodeName)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ZPuEnk",
+    "label": "Folder Data Connections",
+    "def": "Count(distinct FolderConnectionDataConnectionName)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ZzBR",
+    "label": "Daily Avg. Task Executions",
+    "def": "Avg(Aggr([Task Executions], [Task Execution Start Date]))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "a2d994eb-b418-457f-826e-1512bb4caba0",
+    "label": "App RAM Footprint (MB)",
+    "def": "Num(Sum(AppRAM_MB),'#,##0')",
+    "tags": [],
+    "description": "The memory footprint of an app when reloaded. \nNote that in practice, this is the baseline memory consumed by an app. As users make selections and navigate the app, additional memory will be cached by the app."
+  },
+  {
+    "id": "aPvmUJ",
+    "label": "Distinct Users (Last X Days)",
+    "def": "Sum(AppTotalDistinctUsers)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "aRHmMh",
+    "label": "Finished Fail",
+    "def": "Sum(TaskExecutionStatusFinishedFail)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "aVxemwm",
+    "label": "Reloaded in Last 90 Days",
+    "def": "Count({\u003c[App Last Reloaded]={'Last 90 Days'}\u003e} distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "aafc7ff7-dc9c-452e-a148-a16134b09071",
+    "label": "Unpublished",
+    "def": "Count({\u003cAppPublished={'Unpublished'}\u003e} distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "abe41599-f6ec-4762-8395-bd179e0e0c48",
+    "label": "App RAM / File Size",
+    "def": "Num(Sum(RAM_FileSizeRatio),'#,##0.0')",
+    "tags": [],
+    "description": "Ratio of App in memory (RAM) to size on disk."
+  },
+  {
+    "id": "ac038313-168b-4d7d-a308-38a33990bdae",
+    "label": "Tasks Executed in Last 90 Days",
+    "def": "Count({\u003c[App Last Reloaded]={'Last 90 Days'}\u003e} distinct TaskID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "aeba5bdf-fe46-423b-b479-76d2372d4f7b",
+    "label": "% Reloaded",
+    "def": "[Reloaded]/Apps",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "afbb20b4-b9b5-435f-ac06-8aa18713681a",
+    "label": "Avg. Script Time (hh:mm)",
+    "def": "Interval(Avg(TaskExecutionScriptTime), 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "awYmYjd",
+    "label": "Sessions (Last 90 Days)",
+    "def": "Count({\u003c[Session in Last 90 Days]={1}\u003e}DISTINCT SessionID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "bWPac",
+    "label": "Max Concurrenct RAM Footprint (GB)",
+    "def": "Max(Aggr(Sum(Aggr(SessionAppRAM_GB, ConcurrencyMinute, SessionAppID, [Session Hostname])), ConcurrencyMinute))\r\n//Max(Aggr(Sum(SessionAppRAM_GB), ConcurrencyMinute))\n",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "bb4f1151-427c-43f6-9a99-b3fe03b5c733",
+    "label": "Avg. Queuing Minutes",
+    "def": "Interval(Avg(TaskExecutionQueuingTime), 'm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "c4529980-7ab0-49dc-83ce-65fdf58fd60f",
+    "label": "App Consumers",
+    "def": "Count(DISTINCT User)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "cGerQ",
+    "label": "Max Script Time (hh:mm)",
+    "def": "Max(TaskExecutionScriptTime)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "cKhw",
+    "label": "Table RAM Footprint (MB)",
+    "def": "Num(Sum(TableSize_MB),'#,##0')",
+    "tags": [],
+    "description": "The memory footprint of a data table within an app when reloaded."
+  },
+  {
+    "id": "cwdbfk",
+    "label": "Avg. Concurrent Session RAM (GB)",
+    "def": "[Avg. Concurrent Session RAM (GB)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "d52bdf9d-8a74-4784-9e03-229fc4bcd81a",
+    "label": "Avg App RAM Footprint (MB)",
+    "def": "Num(Avg(AppRAM_MB),'#,##0')",
+    "tags": [],
+    "description": "(Average) The memory footprint of an app when reloaded. \nNote that in practice, this is the baseline memory consumed by an app. As users make selections and navigate the app, additional memory will be cached by the app."
+  },
+  {
+    "id": "dFESJZJ",
+    "label": "Duplicates File Size (GB)",
+    "def": "[File Size (with duplicates)] - [File Size (no duplicates)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "dYtUwK",
+    "label": "Avg. Monthly Script Time (hh:mm)",
+    "def": "Avg(Aggr([Script Time (hh:mm)], [Task Execution Start Month], AppID))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "dkcpzvX",
+    "label": "App Contains Circular Reference(s)",
+    "def": "Count({\u003c[AppContainsCircularReference(s)]={'Has Circular Reference(s)'}\u003e} DISTINCT AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "e2423d6a-1e60-433a-8752-40a933f47d10",
+    "label": "App RAM Footprint (GB)",
+    "def": "Num(Sum(AppRAM_GB),'#,##0')",
+    "tags": [],
+    "description": "The memory footprint of an app when reloaded. \nNote that in practice, this is the baseline memory consumed by an app. As users make selections and navigate the app, additional memory will be cached by the app."
+  },
+  {
+    "id": "eURbm",
+    "label": "Mnth. Avg. Script Time (hh:mm)",
+    "def": "Interval(Avg(Aggr([Script Time (hh:mm)], [Task Execution Start Month])), 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "eZJJSjQ",
+    "label": "Apps Contain Synthetic Keys",
+    "def": "Num(Count({\u003c[AppContainsSyntheticKeys]={1}\u003e}DISTINCT AppID),'#,##0')",
+    "tags": [],
+    "description": "Indicates if an app's data model contains one or more synthetic keys.\nA synthetic key is created when two or more fields are found in two or more tables within an app data model."
+  },
+  {
+    "id": "eee1cc4a-e3fd-4476-bae9-b3d9e400083f",
+    "label": "Task Executions",
+    "def": "Count(DISTINCT TaskExecutionId)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "egAcRM",
+    "label": "Warnings",
+    "def": "Sum(WarningCounter)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "fDRphm",
+    "label": "% Published Apps",
+    "def": "Published/Count(distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "fcdccab1-6295-4374-8902-90f41171d57c",
+    "label": "Data Connections",
+    "def": "Count(distinct DataConnectionName)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "jgawcV",
+    "label": "Task Execution Status",
+    "def": "100+Sum(TaskExecutionStatusFlag)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "fhZrY",
+    "label": "Unique Session Apps",
+    "def": "Count(distinct SessionAppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "gjctJv",
+    "label": "Max Concurrent Sessions",
+    "def": "Max(Aggr([Sessions], ConcurrencyMinute))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "gjpZqpd",
+    "label": "Field Cardinality",
+    "def": "Num(Sum(FieldCardinality),'#,##0')",
+    "tags": [],
+    "description": "Cardinality is a measure of uniqueness of field values. Higher cardinality means more unique field values, which generally results in higher memory utilization."
+  },
+  {
+    "id": "gqBJGsT",
+    "label": "App Contains Data Island(s)",
+    "def": "Count({\u003c[AppContainsDataIsland(s)]={'Has Island Table'}\u003e} DISTINCT AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "gyXhPJp",
+    "label": "Active Users (Last X Days)",
+    "def": "Count(DISTINCT User)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "hMrmkFH",
+    "label": "Max Concurrent Users (Last 90 Days)",
+    "def": "Max({\u003c[Session in Last 90 Days]={1}\u003e}\r\n  Aggr(\n      Count({\u003cConcurrencyMinute={*}\u003e}DISTINCT User),\n      AppID,\n      ConcurrencyMinute\n  )\n) \u0026 ''\n",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "hWqfhs",
+    "label": "Unique Session Users",
+    "def": "Count(distinct SessionUser)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "hjhsUaP",
+    "label": "Warning Message Types",
+    "def": "Count({\u003c[Message Severity]={'WARN'}\u003e} distinct [Message Header])",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "hywTpT",
+    "label": "Max Concurrent Base RAM",
+    "def": "$(vMaxConcurrentBaseRAM)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "jUNayZG",
+    "label": "Minimum Required Capacity Purchase",
+    "def": "If(([Est. Consumption Size] * 3) \u003c [Est. Reload Size],Ceil([Est. Reload Size] / 3,20),[Est. Consumption Size])",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "jjmwfN",
+    "label": "Files",
+    "def": "[Files (with duplicates)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "jpWFq",
+    "label": "File Size (with duplicates)",
+    "def": "Sum(FolderConnectionFileSizeBytes) / 1024  / 1024 / 1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "jwdTSzy",
+    "label": "Table # Records",
+    "def": "Num(Sum(TableNoOfRows),'#,##0')",
+    "tags": [],
+    "description": "Count of records within a given table in an app data model."
+  },
+  {
+    "id": "kJjRn",
+    "label": "Est. Consumption Size",
+    "def": "If(Ceil($(vMaxConcurrentBaseRAM),20)=0 AND Ceil(vMaxConcurrentPeakReloadRAM)\u003e0,20,\r\nIf(Ceil($(vMaxConcurrentBaseRAM),20)=0,'N/A',\nCeil($(vMaxConcurrentBaseRAM),20)))\n",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "kuBqMm",
+    "label": "% Finished Success",
+    "def": "[Finished Success]/[Task Executions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "mFGdJt",
+    "label": "Est. Reload Size",
+    "def": "If(\r\n    Ceil(\n        $(vMaxConcurrentPeakReloadRAM),\n        20\n    )=0,\n    'N/A',\n    Ceil(\n        $(vMaxConcurrentPeakReloadRAM),\n        20\n    )\n)\n\n//If(\n//    Ceil(\n//        $(vMaxConcurrentPeakReloadRAM),\n//        20\n//    )=0,\n//    Dual('N/A',0),\n//    Ceil(\n//        $(vMaxConcurrentPeakReloadRAM),\n//        20\n//    )\n//)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "mJjqmb",
+    "label": "Apps with Metadata",
+    "def": "Num(Count({\u003cAppReloadedBeyondCutoffDate={1}\u003e}DISTINCT AppID),'#,##0')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "mLmZNUk",
+    "label": "Files (no duplicates)",
+    "def": "Count(DISTINCT FolderConnectionFileSimilarKey)",
+    "tags": [],
+    "description": "Distinct count of files scanned."
+  },
+  {
+    "id": "mNJBMv",
+    "label": "App Has Synthetic Keys",
+    "def": "Count({\u003cAppContainsSyntheticKeys={'Has Synthetic Keys'}\u003e} DISTINCT AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "mPNjZ",
+    "label": "App File Size (MB)",
+    "def": "Num(Sum(AppFileSize_MB),'#,##0')",
+    "tags": [],
+    "description": "Size of app on disk."
+  },
+  {
+    "id": "mmrDLM",
+    "label": "Script Time (hh:mm)",
+    "def": "Interval(Sum(TaskExecutionScriptTime), 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "ncyxPz",
+    "label": "Streams",
+    "def": "Sum(StreamCounter)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "nyKqpDZ",
+    "label": "Archived Log Files Storage",
+    "def": "Sum(SumArchivedLogFileSize)/1024/1024/1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "pGySHX",
+    "label": "Apps w/o Metadata",
+    "def": "Count({\u003cAppReloadedBeyondCutoffDate={0}\u003e}DISTINCT AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "pHQre",
+    "label": "Apps Consuming Files",
+    "def": "Count(distinct DataConnectionsAppLinkAppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "pYMtfp",
+    "label": "Last Reload Time",
+    "def": "Time(AppLastReloadTime,'h:mm:ss')",
+    "tags": [],
+    "description": "The latest timestamp when an app was reloaded in Sense."
+  },
+  {
+    "id": "pjBPKW",
+    "label": "Peak Reload RAM (GB)",
+    "def": "If(IsNull(AppRAMPeakReload_GB), 'N/A', Num(AppRAMPeakReload_GB, '#,##0.00'))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "qSmHP",
+    "label": "Distinct Users",
+    "def": "Count(DISTINCT User)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "rjjPM",
+    "label": "Tasks Enabled",
+    "def": "Count({\u003c\"TaskEnabled\"={'True'}\u003e}DISTINCT TaskID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "tJaxm",
+    "label": "Error Message Types",
+    "def": "Count({\u003c[Message Severity]={'ERROR'}\u003e} distinct [Message Header])",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "tkBpRn",
+    "label": "Accessed in Last 90 Days",
+    "def": "Count({\u003c[App Last Accessed]={'App Accessed Within 90 Days'}\u003e} distinct AppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "uGWVjpe",
+    "label": "Island Tables",
+    "def": "Num(Sum(TableIsIsland),'#,##0')",
+    "tags": [],
+    "description": "Count of tables within an app which are \"islands\", meaning that they are not associated with any other table in the data model."
+  },
+  {
+    "id": "vCrnTV",
+    "label": "Engine Nodes w/Sessions",
+    "def": "Count(distinct [Session Hostname])",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "vvuJJXF",
+    "label": "Reload CPU Time",
+    "def": "Time([App Reload CPU Time (ms)]/86400000,'hh:mm:ss')",
+    "tags": [],
+    "description": "Engine CPU time spent during last app reload, given in milliseconds (ms). Note: this is not the same as Reload Duration reported in other Monitor Apps, but is specific to the time that the engine spent to reload the app."
+  },
+  {
+    "id": "vzFepz",
+    "label": "Avg. Concurrent Sessions",
+    "def": "Avg(Aggr([Sessions], ConcurrencyMinute))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "wPwqQ",
+    "label": "Data for Analysis Capacity Est",
+    "def": "[File Size GB (Duplicate Handling)] + [Total Peak Reload RAM (GB)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "wTjb",
+    "label": "% Overall Usage",
+    "def": "Sum(AppTotalSessionCount) / Sum({1}TOTAL AppTotalSessionCount)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "wXnYP",
+    "label": "Max Daily Task Executions",
+    "def": "Max(Aggr([Task Executions], [Task Execution Start Date]))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "wgPPpAY",
+    "label": "Apps on Server",
+    "def": "Count(DISTINCT AppID)",
+    "tags": [],
+    "description": "Count of apps found in the Sense environment, as reported in the Qlik Sense Repository (QSR) database. Only apps which have been reloaded with Sense June 2018 or later will include necessary metadata to be analyzed in this app."
+  },
+  {
+    "id": "wjvKMR",
+    "label": "App File Size (GB)",
+    "def": "Round(Avg(AppFileSize_GB),.01)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "yduCzpd",
+    "label": "Avg. Concurrent Session RAM (GB)",
+    "def": "Avg(Aggr(Sum(Aggr(SessionAppRAM_GB, ConcurrencyMinute, SessionAppID, [Session Hostname])), ConcurrencyMinute))",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "yevR",
+    "label": "Storage",
+    "def": "Sum(SumArchivedLogFileSize)/1024/1024/1024",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "zaxaNJ",
+    "label": "Apps Accessing File",
+    "def": "Count(DISTINCT FolderConnectionAppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "zpBpJXj",
+    "label": "Avg. Concurrent Sessions",
+    "def": "[Avg. Concurrent Sessions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "StBeY",
+    "label": "Task Execution Duration (hh:mm)",
+    "def": "Sum(TaskExecutionScriptTime)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "RJgpYz",
+    "label": "Total Duration (hh:mm)",
+    "def": "Interval(Sum(TaskExecutionDuration)/1000/24/60/60, 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "LFPpPG",
+    "label": "Queuing Time (hh:mm)",
+    "def": "Interval(Sum(TaskExecutionQueuingTime), 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "wADHK",
+    "label": "Saving Time (hh:mm)",
+    "def": "Interval(Sum(TaskExecutionSavingTime), 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "8d8cd982-13b8-4959-9266-7bd4fc68be7b",
+    "label": "Max Concurrent Sessions Short",
+    "def": "[Max Concurrent Sessions]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "LpZXnbW",
+    "label": "Max Concurrent Task Execution Peak Reload RAM (GB) Short",
+    "def": "[Max Concurrent Task Execution Peak Reload RAM (GB)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "zGEjPRz",
+    "label": "Last 10 Reload Status",
+    "def": "100 + Sum([Task Execution Success Indicator Num])",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "NYXrPM",
+    "label": "Duplicates File Size (GB) Short",
+    "def": "[Duplicates File Size (GB)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "HptmPe",
+    "label": "Presumed Duplicates Short",
+    "def": "[Presumed Duplicates]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "7665a277-f8c7-4526-b892-aa488b7fe3c8",
+    "label": "Accessed",
+    "def": "Count(distinct SessionAppID)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "qadkM",
+    "label": "File Size GB (with duplicates) Short",
+    "def": "[File Size (with duplicates)]",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "pTVCp",
+    "label": "Task Type",
+    "def": "TaskType",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "EVstAJX",
+    "label": "Task Event Cadence",
+    "def": "TaskEventCadence",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "Jguypyt",
+    "label": "Task Event Interval Minutes",
+    "def": "Sum(TaskEventIntervalMinutes)",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "CwHLs",
+    "label": "Task Event Filter",
+    "def": "TaskEventFilter",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "pKxaMD",
+    "label": "vFileScanMaxDuration",
+    "def": "Interval($(vFileScanMaxDuration)/24/60, 'h:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "gvws",
+    "label": "Folder Scan Duration",
+    "def": "Interval(Max(FolderScanDuration)/24/60, 'hh:mm')",
+    "tags": [],
+    "description": ""
+  },
+  {
+    "id": "aeRfpW",
+    "label": "Max Reached",
+    "def": "If(FolderScanDuration \u003c $(vFileScanMaxDuration), '', ' (Max reached)')",
+    "tags": [],
+    "description": ""
+  }
+]

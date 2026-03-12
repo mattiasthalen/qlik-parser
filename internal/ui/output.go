@@ -19,11 +19,11 @@ const (
 
 // Result holds all information about a single file processing outcome.
 type Result struct {
-	Status    Status
-	SrcPath   string
-	QVSPath   string
-	CharCount int
-	Message   string
+	Status  Status
+	SrcPath string
+	OutDir  string   // output folder path, no trailing slash
+	Files   []string // artifact filenames written, in canonical order
+	Message string
 }
 
 var (
@@ -67,8 +67,8 @@ func (p *Printer) FileResult(r Result) {
 
 func (p *Printer) printOK(r Result) {
 	sym := p.colorize("✓", okStyle)
-	count := formatCount(r.CharCount)
-	line := fmt.Sprintf("  %s  %s → %s  (%s chars)", sym, r.SrcPath, r.QVSPath, count)
+	fileList := strings.Join(r.Files, ", ")
+	line := fmt.Sprintf("  %s  %s → %s/  (%s)", sym, r.SrcPath, r.OutDir, fileList)
 	if p.dryRun {
 		line += "  " + p.colorize("[dry run]", dimStyle)
 	}
@@ -106,7 +106,7 @@ func (p *Printer) Summary() {
 	if p.dryRun {
 		line = fmt.Sprintf("  Dry run — %d files would be extracted  %s", total, counts)
 	} else {
-		line = fmt.Sprintf("  Extracted %d scripts   %s", p.okCount, counts)
+		line = fmt.Sprintf("  Extracted %d apps   %s", p.okCount, counts)
 	}
 	_, _ = fmt.Fprintln(p.w, line)
 }
@@ -135,20 +135,4 @@ func (p *Printer) colorize(s string, style lipgloss.Style) string {
 		return s
 	}
 	return style.Render(s)
-}
-
-// formatCount formats an integer with comma thousands separators.
-func formatCount(n int) string {
-	s := fmt.Sprintf("%d", n)
-	if len(s) <= 3 {
-		return s
-	}
-	var result []byte
-	for i, c := range s {
-		if i > 0 && (len(s)-i)%3 == 0 {
-			result = append(result, ',')
-		}
-		result = append(result, byte(c))
-	}
-	return string(result)
 }

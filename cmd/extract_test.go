@@ -111,10 +111,8 @@ func TestExtractCmd_DryRunNoFilesWritten(t *testing.T) {
 	}
 
 	entries, _ := os.ReadDir(outDir)
-	for _, e := range entries {
-		if filepath.Ext(e.Name()) == ".qvs" {
-			t.Errorf("expected no .qvs in dry-run, found: %s", e.Name())
-		}
+	if len(entries) != 0 {
+		t.Errorf("expected no output in dry-run, found %d entries", len(entries))
 	}
 }
 
@@ -134,9 +132,9 @@ func TestExtractCmd_Integration_ValidFixture(t *testing.T) {
 	// Some fixtures will error (invalid_zlib, too_short) — that's expected
 	_ = root.Execute()
 
-	gotBytes, readErr := os.ReadFile(filepath.Join(outDir, "valid.qvs"))
+	gotBytes, readErr := os.ReadFile(filepath.Join(outDir, "valid.qvw", "script.qvs"))
 	if readErr != nil {
-		t.Fatalf("expected valid.qvs to be written: %v", readErr)
+		t.Fatalf("expected valid.qvw/script.qvs to be written: %v", readErr)
 	}
 
 	goldenPath := filepath.Join(fixturesDir, "valid.qvs.golden")
