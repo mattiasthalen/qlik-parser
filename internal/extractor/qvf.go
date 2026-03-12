@@ -47,8 +47,10 @@ func ExtractScriptFromQVF(path string) (string, error) {
 		if err != nil {
 			continue
 		}
+		// Some QVF blocks have a trailing null byte; strip it before JSON parsing.
+		trimmed := bytes.TrimRight(decompressed, "\x00")
 		var payload qvfPayload
-		if err := json.Unmarshal(decompressed, &payload); err != nil {
+		if err := json.Unmarshal(trimmed, &payload); err != nil {
 			continue
 		}
 		if payload.QScript != "" {

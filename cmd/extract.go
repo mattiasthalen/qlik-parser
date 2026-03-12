@@ -22,8 +22,8 @@ func newExtractCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "extract",
-		Short: "Extract artifacts from .qvw files",
-		Long: `Recursively scans --source for .qvw files and extracts embedded
+		Short: "Extract artifacts from .qvw and .qvf files",
+		Long: `Recursively scans --source for .qvw and .qvf files and extracts embedded
 artifacts to text files alongside or under --out.`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -62,21 +62,13 @@ artifacts to text files alongside or under --out.`,
 				log.Warn().Msg(w)
 			}
 
-			// Filter to only .qvw files (skip .qvf files for now)
-			var qvwPaths []string
-			for _, p := range qlikPaths {
-				if filepath.Ext(p) == ".qvw" {
-					qvwPaths = append(qvwPaths, p)
-				}
-			}
-
 			isTTY := ui.IsTTY(os.Stdout)
 			printer := ui.NewPrinter(cmd.OutOrStdout(), isTTY, dryRun)
 
 			hasErr := false
 
-			for i, qvwPath := range qvwPaths {
-				printer.UpdateSpinner(i+1, len(qvwPaths))
+			for i, qvwPath := range qlikPaths {
+				printer.UpdateSpinner(i+1, len(qlikPaths))
 
 				relPath, err := filepath.Rel(sourceDir, qvwPath)
 				if err != nil {
@@ -156,7 +148,7 @@ artifacts to text files alongside or under --out.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw files (default: current directory)")
+	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw and .qvf files (default: current directory)")
 	cmd.Flags().StringVarP(&outDir, "out", "o", "", "Export directory (default: alongside .qvw files)")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be extracted without writing files")
 	cmd.Flags().BoolVar(&script, "script", true, "Extract load scripts")
