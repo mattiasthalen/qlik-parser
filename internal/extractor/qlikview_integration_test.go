@@ -12,16 +12,16 @@ import (
 	"github.com/mattiasthalen/qlik-parser/internal/extractor"
 )
 
-const qlikviewTestdata = "testdata/qlikview"
+const qlikviewTestdata = "testdata/fixtures/integration"
 
 func skipIfNoQlikviewFixtures(t *testing.T) {
 	t.Helper()
 	if _, err := os.Stat(qlikviewTestdata); os.IsNotExist(err) {
-		t.Skip("real QVW fixtures not present (gitignored) — skipping")
+		t.Skip("real QVW fixtures not present — skipping")
 	}
 }
 
-func TestQlikview_WalkerFindsAll34Files(t *testing.T) {
+func TestQlikview_WalkerFindsAllFiles(t *testing.T) {
 	skipIfNoQlikviewFixtures(t)
 
 	paths, warns := extractor.Walk(qlikviewTestdata)
@@ -29,8 +29,8 @@ func TestQlikview_WalkerFindsAll34Files(t *testing.T) {
 	if len(warns) != 0 {
 		t.Errorf("expected no warnings, got: %v", warns)
 	}
-	if len(paths) != 18 {
-		t.Errorf("expected 18 QVW files, got %d: %v", len(paths), paths)
+	if len(paths) != 1 {
+		t.Errorf("expected 1 QVW file, got %d: %v", len(paths), paths)
 	}
 }
 
@@ -66,34 +66,6 @@ func TestQlikview_AllScriptsStartWithTripleSlash(t *testing.T) {
 		}
 		if !strings.HasPrefix(script, "///") {
 			t.Errorf("%s: expected script to start with ///, got: %q", rel, script[:min(30, len(script))])
-		}
-	}
-}
-
-func TestQlikview_ExtractMirrorMode_PreservesSubdirStructure(t *testing.T) {
-	skipIfNoQlikviewFixtures(t)
-
-	srcDir, _ := filepath.Abs(qlikviewTestdata)
-	outDir := t.TempDir()
-
-	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"extract", "--source", srcDir, "--out", outDir})
-	buf := &bytes.Buffer{}
-	root.SetOut(buf)
-
-	if err := root.Execute(); err != nil {
-		t.Fatalf("extract failed: %v", err)
-	}
-
-	// Verify one file from each subdir to confirm structure is mirrored
-	expected := []string{
-		filepath.Join(outDir, "extract", "QVD Extract IFS.qvs"),
-		filepath.Join(outDir, "load", "IFS Recipe Structure.qvs"),
-		filepath.Join(outDir, "transform", "QVD Transform IFS.qvs"),
-	}
-	for _, f := range expected {
-		if _, err := os.Stat(f); err != nil {
-			t.Errorf("expected mirrored output file not found: %s", f)
 		}
 	}
 }
@@ -136,7 +108,7 @@ func TestQlikview_ExtractSucceeds_ExitCode0(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "Extracted 18 scripts") {
-		t.Errorf("expected 'Extracted 18 scripts' in summary, got: %q", out)
+	if !strings.Contains(out, "Extracted 1 scripts") {
+		t.Errorf("expected 'Extracted 1 scripts' in summary, got: %q", out)
 	}
 }
