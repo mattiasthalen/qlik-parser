@@ -7,7 +7,7 @@ title: qlik-parser
 
 # qlik-parser
 
-Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files — fast, cross-platform, and scriptable.
+Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files.
 
 <pre class="terminal"><code>qlik-parser extract --source ./qlik-apps --out ./scripts</code></pre>
 
