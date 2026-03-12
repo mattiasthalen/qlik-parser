@@ -85,6 +85,7 @@ func ParseQVF(path string) (*QVFData, error) {
 			var s string
 			if err := json.Unmarshal(scriptRaw, &s); err == nil && s != "" {
 				result.Script = s
+				// Each artifact type lives in its own zlib block in well-formed .qvf files.
 				continue
 			}
 		}
@@ -204,31 +205,24 @@ func parseDimension(id string, raw map[string]json.RawMessage) (Dimension, bool)
 }
 
 func parseVariables(raw map[string]json.RawMessage) []Variable {
-	var list struct {
-		QEntryList []struct {
-			QInfo struct {
-				QID string `json:"qId"`
-			} `json:"qInfo"`
-			QData struct {
-				QName    string          `json:"qName"`
-				QComment string          `json:"qComment"`
-				QValue   json.RawMessage `json:"qValue"`
-			} `json:"qData"`
-		} `json:"qEntryList"`
-	}
 	if raw["qEntryList"] == nil {
 		return []Variable{}
 	}
-	// Reconstruct the full JSON to unmarshal the entry list.
-	full, err := json.Marshal(raw)
-	if err != nil {
+	var entries []struct {
+		QInfo struct {
+			QID string `json:"qId"`
+		} `json:"qInfo"`
+		QData struct {
+			QName    string          `json:"qName"`
+			QComment string          `json:"qComment"`
+			QValue   json.RawMessage `json:"qValue"`
+		} `json:"qData"`
+	}
+	if err := json.Unmarshal(raw["qEntryList"], &entries); err != nil {
 		return []Variable{}
 	}
-	if err := json.Unmarshal(full, &list); err != nil {
-		return []Variable{}
-	}
-	vars := make([]Variable, 0, len(list.QEntryList))
-	for _, e := range list.QEntryList {
+	vars := make([]Variable, 0, len(entries))
+	for _, e := range entries {
 		vars = append(vars, Variable{
 			ID:      e.QInfo.QID,
 			Name:    e.QData.QName,
