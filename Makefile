@@ -2,6 +2,7 @@
 
 BINARY := qlik-script-extractor
 GOLANGCI_LINT_VERSION := v2.11.3
+SVU_VERSION := v3.4.0
 
 build:
 	go build -o $(BINARY) .
@@ -20,9 +21,9 @@ clean:
 	rm -f $(BINARY) coverage.out
 
 install-tools: ## Note: golangci-lint is pre-installed in the devcontainer; this target is for fresh environments or version updates
-	go install github.com/caarlos0/svu@latest
+	go install github.com/caarlos0/svu@$(SVU_VERSION)
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCI_LINT_VERSION)
 
 install-hooks:
-	cp scripts/pre-commit .git/hooks/pre-commit
-	chmod +x .git/hooks/pre-commit
+	cp scripts/pre-commit $(shell git rev-parse --git-common-dir)/hooks/pre-commit
+	chmod +x $(shell git rev-parse --git-common-dir)/hooks/pre-commit
