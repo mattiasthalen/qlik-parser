@@ -20,7 +20,7 @@ const (
 // Result holds all information about a single file processing outcome.
 type Result struct {
 	Status    Status
-	QVWPath   string
+	SrcPath   string
 	QVSPath   string
 	CharCount int
 	Message   string
@@ -68,7 +68,7 @@ func (p *Printer) FileResult(r Result) {
 func (p *Printer) printOK(r Result) {
 	sym := p.colorize("✓", okStyle)
 	count := formatCount(r.CharCount)
-	line := fmt.Sprintf("  %s  %s → %s  (%s chars)", sym, r.QVWPath, r.QVSPath, count)
+	line := fmt.Sprintf("  %s  %s → %s  (%s chars)", sym, r.SrcPath, r.QVSPath, count)
 	if p.dryRun {
 		line += "  " + p.colorize("[dry run]", dimStyle)
 	}
@@ -77,7 +77,7 @@ func (p *Printer) printOK(r Result) {
 
 func (p *Printer) printWarn(r Result) {
 	sym := p.colorize("⚠", warnStyle)
-	line := fmt.Sprintf("  %s  %s  %s", sym, r.QVWPath, r.Message)
+	line := fmt.Sprintf("  %s  %s  %s", sym, r.SrcPath, r.Message)
 	if p.dryRun {
 		line += "  " + p.colorize("[dry run]", dimStyle)
 	}
@@ -86,7 +86,7 @@ func (p *Printer) printWarn(r Result) {
 
 func (p *Printer) printErr(r Result) {
 	sym := p.colorize("✗", errStyle)
-	line := fmt.Sprintf("  %s  %s  %s", sym, r.QVWPath, r.Message)
+	line := fmt.Sprintf("  %s  %s  %s", sym, r.SrcPath, r.Message)
 	if p.dryRun {
 		line += "  " + p.colorize("[dry run]", dimStyle)
 	}

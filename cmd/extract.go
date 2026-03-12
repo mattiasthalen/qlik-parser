@@ -82,7 +82,7 @@ artifacts to text files alongside or under --out.`,
 						printer.ClearSpinner()
 						printer.FileResult(ui.Result{
 							Status:  ui.StatusWarn,
-							QVWPath: relPath,
+							SrcPath: relPath,
 							Message: "no script found",
 						})
 						continue
@@ -95,7 +95,7 @@ artifacts to text files alongside or under --out.`,
 					}
 					printer.FileResult(ui.Result{
 						Status:  ui.StatusErr,
-						QVWPath: relPath,
+						SrcPath: relPath,
 						Message: errMsg,
 					})
 					continue
@@ -118,7 +118,7 @@ artifacts to text files alongside or under --out.`,
 					printer.ClearSpinner()
 					printer.FileResult(ui.Result{
 						Status:  ui.StatusErr,
-						QVWPath: relPath,
+						SrcPath: relPath,
 						Message: writeErr.Error(),
 					})
 					continue
@@ -127,7 +127,7 @@ artifacts to text files alongside or under --out.`,
 				printer.ClearSpinner()
 				printer.FileResult(ui.Result{
 					Status:    ui.StatusOK,
-					QVWPath:   relPath,
+					SrcPath:   relPath,
 					QVSPath:   relOut,
 					CharCount: len(scriptContent),
 				})
