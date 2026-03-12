@@ -2,6 +2,7 @@
 
 **Date:** 2026-03-12
 **Branch:** feat/qvf-extraction
+**Closes:** [#2 — Add support for qvf](https://github.com/mattiasthalen/qlik-parser/issues/2)
 
 ---
 
@@ -62,11 +63,16 @@ if !d.IsDir() && (ext == ".qvw" || ext == ".qvf") {
 
 No changes to the function signature or return types.
 
-**Test impact:** `TestWalkIgnoresNonQVW` currently asserts `.qvf` is ignored. That test must be updated: remove `.qvf` from the ignored-extensions list and add a `.qvf` case to the collected-extensions assertion.
+**Test impact on `walker_test.go`:**
+- `TestWalkFindsQVWFiles` is extended (or a parallel `TestWalkFindsQVFFiles` is added) to assert `.qvf` files are also collected.
+- `TestWalkIgnoresNonQVW` is renamed to `TestWalkIgnoresUnrelatedExtensions` and its fixture set changes from `{"a.qvf", "b.txt", "c.qvs", "d.QVW"}` to `{"a.txt", "b.qvs", "c.QVW"}` — removing `.qvf` (now collected) and keeping only extensions that must still be ignored. The assertion remains: `len(got) == 0`.
 
 ### 3. Modified: `internal/extractor/exporter.go`
 
-`ResolveOutputPath` currently hardcodes `.qvw` suffix trimming. Generalise to strip the actual extension via `filepath.Ext`. The function signature parameter name is updated from `qvwPath` to `inputPath` for clarity (internal change only — no callers use named parameters).
+`ResolveOutputPath` currently hardcodes `.qvw` suffix trimming. Changes:
+- Parameter renamed from `qvwPath` to `inputPath`
+- Doc comment updated to reflect the generalized behaviour (not `.qvw`-specific)
+- Suffix trimming generalized using `filepath.Ext`
 
 Output extension by format:
 - `.qvw` → `.qvs`
@@ -74,7 +80,7 @@ Output extension by format:
 
 The double-extension for `.qvf` is intentional: it avoids silent overwrite when `report.qvw` and `report.qvf` both exist in the same directory (which would otherwise both resolve to `report.qvs`). It also makes the source format visible in the output filename.
 
-**Test impact:** `exporter_test.go` gains new cases for `.qvf` inputs asserting `.qvf.qvs` output. Existing `.qvw` cases continue to pass unchanged.
+**Test impact:** `exporter_test.go` gains new cases for `.qvf` input → `.qvf.qvs` output. Existing `.qvw` cases continue to pass unchanged.
 
 ### 4. Modified: `cmd/extract.go`
 
@@ -93,9 +99,11 @@ case ".qvf":
 
 `ResolveOutputPath` call is unchanged in structure; it now correctly derives the output extension from the input extension via `filepath.Ext`.
 
-**Naming:** The `Result` struct in `internal/ui/output.go` has a field currently named `QVWPath`. This field is renamed to `SrcPath` to reflect that it now holds paths for both `.qvw` and `.qvf` inputs. All callers (`cmd/extract.go`, `output_test.go`) are updated accordingly.
+**Help text:** The `--source` flag description and `Short`/`Long` command descriptions are updated to reference both `.qvw` and `.qvf` files instead of just `.qvw`.
 
-**Help text:** The `--source` flag description and `Short`/`Long` command descriptions are updated to reference both `.qvw` and `.qvf` files.
+### 5. Modified: `internal/ui/output.go`
+
+`Result.QVWPath` is renamed to `Result.SrcPath` to reflect that it now holds paths for both `.qvw` and `.qvf` inputs. All callers (`cmd/extract.go` — all five `ui.Result{...}` literals, `output_test.go` — all fixture literals) are updated accordingly.
 
 ---
 
@@ -112,7 +120,7 @@ Rationale: avoids silent overwrite when both formats share a filename in the sam
 
 ## Script Marker Convention
 
-Both formats use `///$tab` as the script start marker. All tests that check the script prefix are updated to assert `strings.HasPrefix(script, "///$tab")` — both unit tests (`qvw_test.go`) and integration tests.
+Both formats use `///$tab` as the script start marker. All tests that check the script prefix are updated to assert `strings.HasPrefix(script, "///$tab")` — both unit tests (`qvw_test.go` — all prefix assertions including `TestExtractScript_ValidFile` and `TestExtractScript_NoEndMarker`) and integration tests.
 
 ---
 
@@ -140,7 +148,7 @@ Synthetic fixtures are constructed in-memory (no files on disk), consistent with
 
 ### Unit tests: `internal/extractor/qvw_test.go`
 
-- Script prefix assertion tightened from `"///"` to `"///$tab"` for the valid fixture test.
+- All script prefix assertions tightened from `"///"` to `"///$tab"` (`TestExtractScript_ValidFile` and `TestExtractScript_NoEndMarker`).
 
 ### Unit tests: `internal/extractor/exporter_test.go`
 
@@ -149,15 +157,16 @@ Synthetic fixtures are constructed in-memory (no files on disk), consistent with
 
 ### Unit tests: `internal/extractor/walker_test.go`
 
-- `TestWalkIgnoresNonQVW` updated: `.qvf` removed from ignored list, added to collected list.
+- `TestWalkIgnoresNonQVW` renamed to `TestWalkIgnoresUnrelatedExtensions`; `.qvf` removed from its fixture set.
+- `TestWalkFindsQVFFiles` added (parallel to `TestWalkFindsQVWFiles`) asserting `.qvf` files are collected.
 
 ### Integration tests: `internal/extractor/qlikview_integration_test.go`
 
 | Test | Change |
 |------|--------|
 | `TestQlikview_WalkerFindsAllFiles` | Expect **2** files (1 QVW + 1 QVF) |
-| `TestQlikview_AllFilesExtractWithoutError` | Covers both via extension dispatch |
-| `TestQlikview_AllScriptsStartWithTripleSlash` | Tightened to `"///$tab"` |
+| `TestQlikview_AllFilesExtractWithoutError` | Updated to dispatch by extension (`switch filepath.Ext(p)`) calling the appropriate extractor |
+| `TestQlikview_AllScriptsStartWithTripleSlash` | Updated to dispatch by extension; assertion tightened to `"///$tab"` |
 | `TestQlikview_ExtractSucceeds_ExitCode0` | Expect `"Extracted 2 scripts"` in summary |
 
 The `skipIfNoQlikviewFixtures` guard remains unchanged — it checks for the directory, which already contains both files.
