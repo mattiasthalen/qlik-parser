@@ -14,6 +14,7 @@ Project-specific memory (conventions, feedback, context) lives in this file (`CL
 
 - Do not commit failing tests to the branch. Write the test and implementation together, committing only when the test passes. The "red" phase is local-only — never push a failing test as a standalone commit.
 - Do not commit to main, it's protected. Always use a worktree.
+- Always create a git worktree before creating or updating any files.
 
 ## TODO
 

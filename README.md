@@ -4,7 +4,7 @@
 [![Latest Release](https://img.shields.io/github/v/release/mattiasthalen/qlik-parser)](https://github.com/mattiasthalen/qlik-parser/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files.
+Extract artifacts from QlikView (.qvw) and Qlik Sense (.qvf) files.
 
 ## Quick Start
 
@@ -12,7 +12,7 @@ Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files.
 qlik-parser extract --source ./qlik-apps --out ./scripts
 ```
 
-This scans `./qlik-apps` recursively for `.qvw` and `.qvf` files and writes the extracted load scripts to `./scripts`, mirroring the source folder structure.
+This scans `./qlik-apps` recursively for `.qvw` and `.qvf` files and writes extracted artifacts to `./scripts`, creating a folder per source file (e.g. `./scripts/sales.qvf/script.qvs`).
 
 ## Installation
 
@@ -40,7 +40,7 @@ Extract the `.zip` and move `qlik-parser.exe` to a directory on your `PATH`.
 
 ### `extract`
 
-Recursively scans `--source` for `.qvw` and `.qvf` files and extracts embedded load scripts.
+Recursively scans `--source` for `.qvw` and `.qvf` files and extracts embedded artifacts.
 
 ```
 qlik-parser extract [flags]
@@ -50,15 +50,20 @@ qlik-parser extract [flags]
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
-| `--script` | | `true` | Extract load scripts |
+| `--script` | | `false` | Extract load scripts |
+| `--measures` | | `false` | Extract master measures (QVF only) |
+| `--dimensions` | | `false` | Extract master dimensions (QVF only) |
+| `--variables` | | `false` | Extract variables (QVF only) |
 | `--source` | `-s` | current directory | Source directory to scan |
 | `--out` | `-o` | alongside source files | Output directory |
 | `--dry-run` | | `false` | Preview without writing files |
 
+> No artifact flags passed → all artifacts extracted. Explicit flags → only those artifact types.
+
 **Output path behaviour:**
 
-- `--out` specified: mirrors source folder structure under the output directory
-- `--out` omitted: writes `.qvs` files alongside the source files
+- `--out` specified: mirrors source folder structure under the output directory, one folder per source file
+- `--out` omitted: creates a folder per source file alongside the source
 
 **Example — dry run:**
 
