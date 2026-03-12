@@ -4,3 +4,4 @@ internal/extractor/testdata/qlikview/
 *.qvf
 qlik-script-extractor
 coverage.out
+dist/
