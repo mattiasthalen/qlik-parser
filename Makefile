@@ -1,4 +1,4 @@
-.PHONY: build test lint clean cover install-tools install-hooks
+.PHONY: build test lint clean cover install-tools install-hooks next-version release release-patch release-minor release-major
 
 BINARY := qlik-script-extractor
 GOLANGCI_LINT_VERSION := v2.11.3
@@ -27,3 +27,22 @@ install-tools: ## Note: golangci-lint is pre-installed in the devcontainer; this
 install-hooks:
 	cp scripts/pre-commit $(shell git rev-parse --git-common-dir)/hooks/pre-commit
 	chmod +x $(shell git rev-parse --git-common-dir)/hooks/pre-commit
+
+next-version:
+	svu next
+
+release:
+	git tag $(shell svu next)
+	git push --tags
+
+release-patch:
+	git tag $(shell svu patch)
+	git push --tags
+
+release-minor:
+	git tag $(shell svu minor)
+	git push --tags
+
+release-major:
+	git tag $(shell svu major)
+	git push --tags
