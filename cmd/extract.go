@@ -118,15 +118,45 @@ artifacts to a per-file folder alongside or under --out.`,
 						})
 					}
 					if doMeasures {
-						b, _ := json.MarshalIndent(qvfData.Measures, "", "  ")
+						b, marshalErr := json.MarshalIndent(qvfData.Measures, "", "  ")
+						if marshalErr != nil {
+							hasErr = true
+							printer.ClearSpinner()
+							printer.FileResult(ui.Result{
+								Status:  ui.StatusErr,
+								SrcPath: relPath,
+								Message: fmt.Sprintf("measures: %v", marshalErr),
+							})
+							continue
+						}
 						artifacts = append(artifacts, extractor.Artifact{Name: "measures.json", Content: b})
 					}
 					if doDimensions {
-						b, _ := json.MarshalIndent(qvfData.Dimensions, "", "  ")
+						b, marshalErr := json.MarshalIndent(qvfData.Dimensions, "", "  ")
+						if marshalErr != nil {
+							hasErr = true
+							printer.ClearSpinner()
+							printer.FileResult(ui.Result{
+								Status:  ui.StatusErr,
+								SrcPath: relPath,
+								Message: fmt.Sprintf("dimensions: %v", marshalErr),
+							})
+							continue
+						}
 						artifacts = append(artifacts, extractor.Artifact{Name: "dimensions.json", Content: b})
 					}
 					if doVariables {
-						b, _ := json.MarshalIndent(qvfData.Variables, "", "  ")
+						b, marshalErr := json.MarshalIndent(qvfData.Variables, "", "  ")
+						if marshalErr != nil {
+							hasErr = true
+							printer.ClearSpinner()
+							printer.FileResult(ui.Result{
+								Status:  ui.StatusErr,
+								SrcPath: relPath,
+								Message: fmt.Sprintf("variables: %v", marshalErr),
+							})
+							continue
+						}
 						artifacts = append(artifacts, extractor.Artifact{Name: "variables.json", Content: b})
 					}
 				} else {
