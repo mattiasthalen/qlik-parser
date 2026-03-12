@@ -1,0 +1,4 @@
+title: qlik-parser
+description: Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files.
+baseurl: /qlik-parser
+url: https://mattiasthalen.github.io

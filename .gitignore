@@ -2,3 +2,5 @@
 qlik-parser
 coverage.out
 dist/
+_site/
+.jekyll-cache/
