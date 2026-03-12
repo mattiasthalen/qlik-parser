@@ -16,20 +16,23 @@ func TestPrinter_SuccessLine(t *testing.T) {
 	buf := &bytes.Buffer{}
 	p := newTestPrinter(buf)
 	p.FileResult(ui.Result{
-		Status:    ui.StatusOK,
-		SrcPath:   "sales.qvw",
-		QVSPath:   "sales.qvs",
-		CharCount: 4821,
+		Status:  ui.StatusOK,
+		SrcPath: "sales.qvw",
+		OutDir:  "sales.qvw",
+		Files:   []string{"script.qvs", "measures.json"},
 	})
 	out := buf.String()
 	if !strings.Contains(out, "sales.qvw") {
-		t.Errorf("expected qvw name in output, got: %q", out)
+		t.Errorf("expected src name in output, got: %q", out)
 	}
-	if !strings.Contains(out, "sales.qvs") {
-		t.Errorf("expected qvs name in output, got: %q", out)
+	if !strings.Contains(out, "sales.qvw/") {
+		t.Errorf("expected outDir with trailing slash in output, got: %q", out)
 	}
-	if !strings.Contains(out, "4,821") {
-		t.Errorf("expected char count in output, got: %q", out)
+	if !strings.Contains(out, "script.qvs") {
+		t.Errorf("expected script.qvs in output, got: %q", out)
+	}
+	if !strings.Contains(out, "measures.json") {
+		t.Errorf("expected measures.json in output, got: %q", out)
 	}
 }
 
@@ -71,10 +74,10 @@ func TestPrinter_DryRunSuffix(t *testing.T) {
 	buf := &bytes.Buffer{}
 	p := ui.NewPrinter(buf, false, true)
 	p.FileResult(ui.Result{
-		Status:    ui.StatusOK,
-		SrcPath:   "sales.qvw",
-		QVSPath:   "sales.qvs",
-		CharCount: 100,
+		Status:  ui.StatusOK,
+		SrcPath: "sales.qvw",
+		OutDir:  "sales.qvw",
+		Files:   []string{"script.qvs"},
 	})
 	out := buf.String()
 	if !strings.Contains(out, "[dry run]") {
@@ -85,22 +88,22 @@ func TestPrinter_DryRunSuffix(t *testing.T) {
 func TestPrinter_Summary_Normal(t *testing.T) {
 	buf := &bytes.Buffer{}
 	p := newTestPrinter(buf)
-	p.FileResult(ui.Result{Status: ui.StatusOK, SrcPath: "a.qvw", QVSPath: "a.qvs"})
-	p.FileResult(ui.Result{Status: ui.StatusOK, SrcPath: "b.qvw", QVSPath: "b.qvs"})
-	p.FileResult(ui.Result{Status: ui.StatusWarn, SrcPath: "c.qvw", Message: "no script"})
+	p.FileResult(ui.Result{Status: ui.StatusOK, SrcPath: "a.qvw", OutDir: "a.qvw", Files: []string{"script.qvs"}})
+	p.FileResult(ui.Result{Status: ui.StatusOK, SrcPath: "b.qvw", OutDir: "b.qvw", Files: []string{"script.qvs"}})
+	p.FileResult(ui.Result{Status: ui.StatusWarn, SrcPath: "c.qvw", Message: "no script found"})
 	p.FileResult(ui.Result{Status: ui.StatusErr, SrcPath: "d.qvw", Message: "corrupt"})
 	p.Summary()
 	out := buf.String()
-	if !strings.Contains(out, "Extracted 2 scripts") {
-		t.Errorf("expected 'Extracted 2 scripts' in summary, got: %q", out)
+	if !strings.Contains(out, "Extracted 2 apps") {
+		t.Errorf("expected 'Extracted 2 apps' in summary, got: %q", out)
 	}
 }
 
 func TestPrinter_Summary_DryRun(t *testing.T) {
 	buf := &bytes.Buffer{}
 	p := ui.NewPrinter(buf, false, true)
-	p.FileResult(ui.Result{Status: ui.StatusOK, SrcPath: "a.qvw", QVSPath: "a.qvs"})
-	p.FileResult(ui.Result{Status: ui.StatusWarn, SrcPath: "b.qvw", Message: "no script"})
+	p.FileResult(ui.Result{Status: ui.StatusOK, SrcPath: "a.qvw", OutDir: "a.qvw", Files: []string{"script.qvs"}})
+	p.FileResult(ui.Result{Status: ui.StatusWarn, SrcPath: "b.qvw", Message: "no script found"})
 	p.Summary()
 	out := buf.String()
 	if !strings.Contains(out, "Dry run — 2 files would be extracted") {
@@ -113,8 +116,8 @@ func TestPrinter_Summary_ZeroFiles(t *testing.T) {
 	p := newTestPrinter(buf)
 	p.Summary()
 	out := buf.String()
-	if !strings.Contains(out, "Extracted 0 scripts") {
-		t.Errorf("expected 'Extracted 0 scripts' in zero-file summary, got: %q", out)
+	if !strings.Contains(out, "Extracted 0 apps") {
+		t.Errorf("expected 'Extracted 0 apps' in zero-file summary, got: %q", out)
 	}
 }
 

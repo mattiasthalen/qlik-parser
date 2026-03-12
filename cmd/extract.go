@@ -108,17 +108,16 @@ artifacts to text files alongside or under --out.`,
 				}
 
 				outDirPath := extractor.ResolveOutputDir(qvwPath, sourceDir, outDir)
-				artifactName := "script.qvs"
-				outPath := filepath.Join(outDirPath, artifactName)
-				relOut, err := filepath.Rel(sourceDir, outPath)
+				relOutDir, err := filepath.Rel(sourceDir, outDirPath)
 				if err != nil {
-					relOut = filepath.Join(filepath.Base(outDirPath), artifactName)
+					relOutDir = filepath.Base(outDirPath)
 				}
 				if outDir != "" && outDir != sourceDir {
-					if r, err := filepath.Rel(outDir, outPath); err == nil {
-						relOut = r
+					if r, err := filepath.Rel(outDir, outDirPath); err == nil {
+						relOutDir = r
 					}
 				}
+				artifactName := "script.qvs"
 
 				artifacts := []extractor.Artifact{
 					{Name: artifactName, Content: []byte(scriptContent)},
@@ -137,10 +136,10 @@ artifacts to text files alongside or under --out.`,
 
 				printer.ClearSpinner()
 				printer.FileResult(ui.Result{
-					Status:    ui.StatusOK,
-					SrcPath:   relPath,
-					QVSPath:   relOut,
-					CharCount: len(scriptContent),
+					Status:  ui.StatusOK,
+					SrcPath: relPath,
+					OutDir:  relOutDir,
+					Files:   []string{artifactName},
 				})
 			}
 

@@ -152,7 +152,7 @@ func TestQlikview_ExtractSucceeds_ExitCode0(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "Extracted 2 scripts") {
-		t.Errorf("expected 'Extracted 2 scripts' in summary, got: %q", out)
+	if !strings.Contains(out, "Extracted 2 apps") {
+		t.Errorf("expected 'Extracted 2 apps' in summary, got: %q", out)
 	}
 }
