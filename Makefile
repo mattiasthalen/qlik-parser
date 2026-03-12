@@ -21,7 +21,7 @@ clean:
 	rm -f $(BINARY) coverage.out
 
 install-tools: ## Note: golangci-lint is pre-installed in the devcontainer; this target is for fresh environments or version updates
-	go install github.com/caarlos0/svu@$(SVU_VERSION)
+	go install github.com/caarlos0/svu/v3@$(SVU_VERSION)
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin $(GOLANGCI_LINT_VERSION)
 
 install-hooks:
