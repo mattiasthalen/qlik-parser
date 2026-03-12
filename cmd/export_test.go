@@ -3,12 +3,15 @@ package cmd_test
 import (
 	"bytes"
 	"errors"
+	"flag"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/mattiasthalen/qlik-script-extractor/cmd"
 )
+
+var update = flag.Bool("update", false, "Update golden files")
 
 func TestExportCmd_HelpRegistered(t *testing.T) {
 	root := cmd.NewRootCmd()
@@ -111,5 +114,80 @@ func TestExportCmd_DryRunNoFilesWritten(t *testing.T) {
 		if filepath.Ext(e.Name()) == ".qvs" {
 			t.Errorf("expected no .qvs in dry-run, found: %s", e.Name())
 		}
+	}
+}
+
+func TestExportCmd_Integration_ValidFixture(t *testing.T) {
+	fixturesDir := filepath.Join("..", "internal", "extractor", "testdata", "fixtures")
+	outDir := t.TempDir()
+
+	root := cmd.NewRootCmd()
+	root.SetArgs([]string{
+		"export",
+		"--source", fixturesDir,
+		"--out", outDir,
+	})
+	buf := &bytes.Buffer{}
+	root.SetOut(buf)
+
+	// Some fixtures will error (invalid_zlib, too_short) — that's expected
+	_ = root.Execute()
+
+	gotBytes, readErr := os.ReadFile(filepath.Join(outDir, "valid.qvs"))
+	if readErr != nil {
+		t.Fatalf("expected valid.qvs to be written: %v", readErr)
+	}
+
+	goldenPath := filepath.Join(fixturesDir, "valid.qvs.golden")
+	if *update {
+		_ = os.WriteFile(goldenPath, gotBytes, 0644)
+		t.Logf("Updated golden file: %s", goldenPath)
+		return
+	}
+
+	wantBytes, err := os.ReadFile(goldenPath)
+	if err != nil {
+		t.Fatalf("golden file not found: %v — run with -update to create it", err)
+	}
+	if !bytes.Equal(gotBytes, wantBytes) {
+		t.Errorf("output does not match golden file.\ngot:  %q\nwant: %q", gotBytes, wantBytes)
+	}
+}
+
+func TestExportCmd_Integration_NoScriptIsWarn(t *testing.T) {
+	fixturesDir := filepath.Join("..", "internal", "extractor", "testdata", "fixtures")
+	outDir := t.TempDir()
+
+	root := cmd.NewRootCmd()
+	root.SetArgs([]string{
+		"export",
+		"--source", fixturesDir,
+		"--out", outDir,
+	})
+	buf := &bytes.Buffer{}
+	root.SetOut(buf)
+	_ = root.Execute()
+
+	out := buf.String()
+	if !bytes.Contains([]byte(out), []byte("no script found")) {
+		t.Errorf("expected 'no script found' warn in output, got: %s", out)
+	}
+}
+
+func TestExportCmd_Integration_ErrorFilesSetExitCode(t *testing.T) {
+	fixturesDir := filepath.Join("..", "internal", "extractor", "testdata", "fixtures")
+	outDir := t.TempDir()
+
+	root := cmd.NewRootCmd()
+	root.SetArgs([]string{
+		"export",
+		"--source", fixturesDir,
+		"--out", outDir,
+	})
+	err := root.Execute()
+
+	var exitErr *cmd.ExitCodeError
+	if !errors.As(err, &exitErr) || exitErr.Code != 1 {
+		t.Errorf("expected ExitCodeError(1) due to corrupt fixtures, got: %v", err)
 	}
 }
