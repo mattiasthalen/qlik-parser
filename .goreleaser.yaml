@@ -5,29 +5,7 @@ before:
     - go mod tidy
 
 builds:
-  - binary: qlik-parser
-    ldflags:
-      - -X github.com/mattiasthalen/qlik-parser/cmd.Version={{ .Version }}
-    goos:
-      - linux
-      - darwin
-      - windows
-    goarch:
-      - amd64
-      - arm64
-
-archives:
-  - formats:
-      - tar.gz
-    format_overrides:
-      - goos: windows
-        formats:
-          - zip
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-
-checksum:
-  name_template: checksums.txt
-  algorithm: sha256
+  - skip: true
 
 changelog:
   sort: asc
