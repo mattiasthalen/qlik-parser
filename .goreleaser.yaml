@@ -5,9 +5,9 @@ before:
     - go mod tidy
 
 builds:
-  - binary: qlik-script-extractor
+  - binary: qlik-parser
     ldflags:
-      - -X github.com/mattiasthalen/qlik-script-extractor/cmd.Version={{ .Version }}
+      - -X github.com/mattiasthalen/qlik-parser/cmd.Version={{ .Version }}
     goos:
       - linux
       - darwin

@@ -1,6 +1,6 @@
 .PHONY: build test lint clean cover install-tools install-hooks next-version release release-patch release-minor release-major
 
-BINARY := qlik-script-extractor
+BINARY := qlik-parser
 GOLANGCI_LINT_VERSION := v2.11.3
 SVU_VERSION := v3.4.0
 

@@ -7,7 +7,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/internal/extractor"
+	"github.com/mattiasthalen/qlik-parser/internal/extractor"
 )
 
 func TestWalkFindsQVWFiles(t *testing.T) {

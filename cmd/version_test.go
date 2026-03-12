@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/cmd"
+	"github.com/mattiasthalen/qlik-parser/cmd"
 )
 
 func TestVersionCmd(t *testing.T) {
@@ -17,7 +17,7 @@ func TestVersionCmd(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	out := buf.String()
-	if !bytes.Contains([]byte(out), []byte("qlik-script-extractor")) {
+	if !bytes.Contains([]byte(out), []byte("qlik-parser")) {
 		t.Errorf("version output missing binary name, got: %s", out)
 	}
 }

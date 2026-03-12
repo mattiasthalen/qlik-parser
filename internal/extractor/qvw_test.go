@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/internal/extractor"
+	"github.com/mattiasthalen/qlik-parser/internal/extractor"
 )
 
 const fixturesDir = "testdata/fixtures"

@@ -7,8 +7,10 @@ Project-specific memory (conventions, feedback, context) lives in this file (`CL
 ## Conventions
 
 - Commit messages use conventional commits style: `feat:`, `fix:`, `chore:`, `docs:`, etc.
-- All commits must be pushed to origin after committing.
+- Merge commits also follows the conventional commit style.
+- Never skip push, all commits must be pushed to origin after committing.
 
 ## Feedback
 
 - Do not commit failing tests to the branch. Write the test and implementation together, committing only when the test passes. The "red" phase is local-only — never push a failing test as a standalone commit.
+- Do not commit to main, it's protected. Always use a worktree.

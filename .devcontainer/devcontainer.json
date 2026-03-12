@@ -1,6 +1,6 @@
 {
-  "name": "Go CLI",
-  "image": "mcr.microsoft.com/devcontainers/go:1.24",
+  "name": "qlik-parser",
+  "image": "mcr.microsoft.com/devcontainers/go:1.26",
   "features": {
     "ghcr.io/stu-bell/devcontainer-features/claude-code:0": {},
     "ghcr.io/devcontainers/features/github-cli:1": {},

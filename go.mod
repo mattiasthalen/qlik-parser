@@ -1,6 +1,6 @@
-module github.com/mattiasthalen/qlik-script-extractor
+module github.com/mattiasthalen/qlik-parser
 
-go 1.25.8
+go 1.25.0
 
 require (
 	github.com/charmbracelet/lipgloss v1.1.0

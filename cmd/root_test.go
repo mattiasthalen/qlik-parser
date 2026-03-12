@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/cmd"
+	"github.com/mattiasthalen/qlik-parser/cmd"
 )
 
 func TestRootHelp(t *testing.T) {
@@ -16,7 +16,7 @@ func TestRootHelp(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if !bytes.Contains(buf.Bytes(), []byte("qlik-script-extractor")) {
+	if !bytes.Contains(buf.Bytes(), []byte("qlik-parser")) {
 		t.Errorf("expected help output to contain binary name, got: %s", buf.String())
 	}
 }

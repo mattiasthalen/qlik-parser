@@ -10,10 +10,10 @@ func NewRootCmd() *cobra.Command {
 	var logLevel string
 
 	root := &cobra.Command{
-		Use:   "qlik-script-extractor",
-		Short: "Extract QlikView load scripts from .qvw files",
-		Long: `qlik-script-extractor recursively scans a directory for QVW files
-and extracts the embedded load scripts to .qvs text files.`,
+		Use:   "qlik-parser",
+		Short: "Parse and extract artifacts from QlikView .qvw files",
+		Long: `qlik-parser recursively scans a directory for QVW files
+and extracts embedded artifacts (load scripts, and more to come).`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
@@ -27,7 +27,7 @@ and extracts the embedded load scripts to .qvs text files.`,
 	}
 
 	root.AddCommand(newVersionCmd())
-	root.AddCommand(newExportCmd())
+	root.AddCommand(newExtractCmd())
 
 	root.PersistentFlags().StringVar(&logLevel, "log-level", "disabled",
 		"Log level: debug, info, warn, error, disabled")

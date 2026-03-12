@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/cmd"
-	"github.com/mattiasthalen/qlik-script-extractor/internal/extractor"
+	"github.com/mattiasthalen/qlik-parser/cmd"
+	"github.com/mattiasthalen/qlik-parser/internal/extractor"
 )
 
 const qlikviewTestdata = "testdata/qlikview"
@@ -70,19 +70,19 @@ func TestQlikview_AllScriptsStartWithTripleSlash(t *testing.T) {
 	}
 }
 
-func TestQlikview_ExportMirrorMode_PreservesSubdirStructure(t *testing.T) {
+func TestQlikview_ExtractMirrorMode_PreservesSubdirStructure(t *testing.T) {
 	skipIfNoQlikviewFixtures(t)
 
 	srcDir, _ := filepath.Abs(qlikviewTestdata)
 	outDir := t.TempDir()
 
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", srcDir, "--out", outDir})
+	root.SetArgs([]string{"extract", "--source", srcDir, "--out", outDir})
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 
 	if err := root.Execute(); err != nil {
-		t.Fatalf("export failed: %v", err)
+		t.Fatalf("extract failed: %v", err)
 	}
 
 	// Verify one file from each subdir to confirm structure is mirrored
@@ -98,19 +98,19 @@ func TestQlikview_ExportMirrorMode_PreservesSubdirStructure(t *testing.T) {
 	}
 }
 
-func TestQlikview_ExportDryRun_WritesNoFiles(t *testing.T) {
+func TestQlikview_ExtractDryRun_WritesNoFiles(t *testing.T) {
 	skipIfNoQlikviewFixtures(t)
 
 	srcDir, _ := filepath.Abs(qlikviewTestdata)
 	outDir := t.TempDir()
 
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", srcDir, "--out", outDir, "--dry-run"})
+	root.SetArgs([]string{"extract", "--source", srcDir, "--out", outDir, "--dry-run"})
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 
 	if err := root.Execute(); err != nil {
-		t.Fatalf("dry-run export failed: %v", err)
+		t.Fatalf("dry-run extract failed: %v", err)
 	}
 
 	entries, _ := os.ReadDir(outDir)
@@ -119,14 +119,14 @@ func TestQlikview_ExportDryRun_WritesNoFiles(t *testing.T) {
 	}
 }
 
-func TestQlikview_ExportSucceeds_ExitCode0(t *testing.T) {
+func TestQlikview_ExtractSucceeds_ExitCode0(t *testing.T) {
 	skipIfNoQlikviewFixtures(t)
 
 	srcDir, _ := filepath.Abs(qlikviewTestdata)
 	outDir := t.TempDir()
 
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", srcDir, "--out", outDir})
+	root.SetArgs([]string{"extract", "--source", srcDir, "--out", outDir})
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 

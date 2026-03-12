@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/internal/ui"
+	"github.com/mattiasthalen/qlik-parser/internal/ui"
 )
 
 func newTestPrinter(buf *bytes.Buffer) *ui.Printer {

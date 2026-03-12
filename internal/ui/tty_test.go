@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/mattiasthalen/qlik-script-extractor/internal/ui"
+	"github.com/mattiasthalen/qlik-parser/internal/ui"
 )
 
 func TestIsTTY_NonTTY(t *testing.T) {
