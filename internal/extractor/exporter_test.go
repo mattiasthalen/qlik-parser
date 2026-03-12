@@ -83,3 +83,25 @@ func TestWriteScript_CreatesIntermediateDirs(t *testing.T) {
 		t.Errorf("file not found after WriteScript: %v", err)
 	}
 }
+
+func TestResolveOutputPath_QVF_Alongside(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
+	got := extractor.ResolveOutputPath("/data/etl/app.qvf", "/data", "")
+	want := "/data/etl/app.qvf.qvs"
+	if got != want {
+		t.Errorf("expected %s, got %s", want, got)
+	}
+}
+
+func TestResolveOutputPath_QVF_Mirror(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
+	got := extractor.ResolveOutputPath("/data/etl/app.qvf", "/data", "/out")
+	want := "/out/etl/app.qvf.qvs"
+	if got != want {
+		t.Errorf("expected %s, got %s", want, got)
+	}
+}

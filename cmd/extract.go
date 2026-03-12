@@ -22,8 +22,8 @@ func newExtractCmd() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "extract",
-		Short: "Extract artifacts from .qvw files",
-		Long: `Recursively scans --source for .qvw files and extracts embedded
+		Short: "Extract artifacts from .qvw and .qvf files",
+		Long: `Recursively scans --source for .qvw and .qvf files and extracts embedded
 artifacts to text files alongside or under --out.`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,7 +57,7 @@ artifacts to text files alongside or under --out.`,
 				}
 			}
 
-			qvwPaths, walkWarns := extractor.Walk(sourceDir)
+			qlikPaths, walkWarns := extractor.Walk(sourceDir)
 			for _, w := range walkWarns {
 				log.Warn().Msg(w)
 			}
@@ -67,22 +67,28 @@ artifacts to text files alongside or under --out.`,
 
 			hasErr := false
 
-			for i, qvwPath := range qvwPaths {
-				printer.UpdateSpinner(i+1, len(qvwPaths))
+			for i, qvwPath := range qlikPaths {
+				printer.UpdateSpinner(i+1, len(qlikPaths))
 
 				relPath, err := filepath.Rel(sourceDir, qvwPath)
 				if err != nil {
 					relPath = filepath.Base(qvwPath)
 				}
 
-				scriptContent, extractErr := extractor.ExtractScript(qvwPath)
+				var scriptContent string
+				var extractErr error
+				if filepath.Ext(qvwPath) == ".qvf" {
+					scriptContent, extractErr = extractor.ExtractScriptFromQVF(qvwPath)
+				} else {
+					scriptContent, extractErr = extractor.ExtractScript(qvwPath)
+				}
 				if extractErr != nil {
 					var noScript *extractor.NoScriptError
 					if errors.As(extractErr, &noScript) {
 						printer.ClearSpinner()
 						printer.FileResult(ui.Result{
 							Status:  ui.StatusWarn,
-							QVWPath: relPath,
+							SrcPath: relPath,
 							Message: "no script found",
 						})
 						continue
@@ -95,7 +101,7 @@ artifacts to text files alongside or under --out.`,
 					}
 					printer.FileResult(ui.Result{
 						Status:  ui.StatusErr,
-						QVWPath: relPath,
+						SrcPath: relPath,
 						Message: errMsg,
 					})
 					continue
@@ -118,7 +124,7 @@ artifacts to text files alongside or under --out.`,
 					printer.ClearSpinner()
 					printer.FileResult(ui.Result{
 						Status:  ui.StatusErr,
-						QVWPath: relPath,
+						SrcPath: relPath,
 						Message: writeErr.Error(),
 					})
 					continue
@@ -127,7 +133,7 @@ artifacts to text files alongside or under --out.`,
 				printer.ClearSpinner()
 				printer.FileResult(ui.Result{
 					Status:    ui.StatusOK,
-					QVWPath:   relPath,
+					SrcPath:   relPath,
 					QVSPath:   relOut,
 					CharCount: len(scriptContent),
 				})
@@ -142,7 +148,7 @@ artifacts to text files alongside or under --out.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw files (default: current directory)")
+	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw and .qvf files (default: current directory)")
 	cmd.Flags().StringVarP(&outDir, "out", "o", "", "Export directory (default: alongside .qvw files)")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be extracted without writing files")
 	cmd.Flags().BoolVar(&script, "script", true, "Extract load scripts")

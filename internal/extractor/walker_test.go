@@ -56,9 +56,31 @@ func TestWalkFindsQVWFiles(t *testing.T) {
 	}
 }
 
-func TestWalkIgnoresNonQVW(t *testing.T) {
+func TestWalkFindsQVFFiles(t *testing.T) {
 	root := t.TempDir()
-	for _, name := range []string{"a.qvf", "b.txt", "c.qvs", "d.QVW"} {
+	files := []string{
+		filepath.Join(root, "app.qvf"),
+		filepath.Join(root, "sub", "nested.qvf"),
+		filepath.Join(root, "ignore.txt"),
+	}
+	_ = os.MkdirAll(filepath.Join(root, "sub"), 0755)
+	for _, f := range files {
+		_ = os.WriteFile(f, []byte{0x00}, 0644)
+	}
+
+	got, warns := extractor.Walk(root)
+
+	if len(warns) != 0 {
+		t.Errorf("expected no warns, got %v", warns)
+	}
+	if len(got) != 2 {
+		t.Fatalf("expected 2 .qvf files, got %d: %v", len(got), got)
+	}
+}
+
+func TestWalkIgnoresUnrelatedExtensions(t *testing.T) {
+	root := t.TempDir()
+	for _, name := range []string{"a.txt", "b.qvs", "c.QVW"} {
 		_ = os.WriteFile(filepath.Join(root, name), []byte{0x00}, 0644)
 	}
 	got, _ := extractor.Walk(root)

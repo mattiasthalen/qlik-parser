@@ -29,8 +29,8 @@ func TestQlikview_WalkerFindsAllFiles(t *testing.T) {
 	if len(warns) != 0 {
 		t.Errorf("expected no warnings, got: %v", warns)
 	}
-	if len(paths) != 1 {
-		t.Errorf("expected 1 QVW file, got %d: %v", len(paths), paths)
+	if len(paths) != 2 {
+		t.Errorf("expected 2 files (1 QVW + 1 QVF), got %d: %v", len(paths), paths)
 	}
 }
 
@@ -41,7 +41,13 @@ func TestQlikview_AllFilesExtractWithoutError(t *testing.T) {
 	for _, p := range paths {
 		rel, _ := filepath.Rel(qlikviewTestdata, p)
 		t.Run(rel, func(t *testing.T) {
-			_, err := extractor.ExtractScript(p)
+			var err error
+			switch filepath.Ext(p) {
+			case ".qvf":
+				_, err = extractor.ExtractScriptFromQVF(p)
+			default:
+				_, err = extractor.ExtractScript(p)
+			}
 			if err != nil {
 				var noScript *extractor.NoScriptError
 				if errors.As(err, &noScript) {
@@ -54,19 +60,57 @@ func TestQlikview_AllFilesExtractWithoutError(t *testing.T) {
 	}
 }
 
-func TestQlikview_AllScriptsStartWithTripleSlash(t *testing.T) {
+func TestQlikview_AllScriptsHaveExpectedContent(t *testing.T) {
 	skipIfNoQlikviewFixtures(t)
+
+	// Known content anchors per fixture, keyed by file extension.
+	// prefix: first distinctive text after ///$tab <tab name>\r\n
+	// suffix: last distinctive text at the very end of the script (trimmed)
+	type anchor struct {
+		prefix string
+		suffix string
+	}
+	anchors := map[string]anchor{
+		".qvw": {
+			prefix: "///$tab Main\r\n//Copyright",
+			suffix: "", // suffix not asserted: fixture contains binary padding after script end
+		},
+		".qvf": {
+			prefix: "///$tab ** about **\r\n/*",
+			suffix: "Trace Woohoo! $(reload_message) Rejoice!;",
+		},
+	}
 
 	paths, _ := extractor.Walk(qlikviewTestdata)
 	for _, p := range paths {
 		rel, _ := filepath.Rel(qlikviewTestdata, p)
-		script, err := extractor.ExtractScript(p)
-		if err != nil {
-			continue // covered by TestQlikview_AllFilesExtractWithoutError
-		}
-		if !strings.HasPrefix(script, "///") {
-			t.Errorf("%s: expected script to start with ///, got: %q", rel, script[:min(30, len(script))])
-		}
+		ext := filepath.Ext(p)
+		t.Run(rel, func(t *testing.T) {
+			var script string
+			var err error
+			switch ext {
+			case ".qvf":
+				script, err = extractor.ExtractScriptFromQVF(p)
+			default:
+				script, err = extractor.ExtractScript(p)
+			}
+			if err != nil {
+				t.Fatalf("extraction error: %v", err)
+			}
+			a, ok := anchors[ext]
+			if !ok {
+				t.Skipf("no anchor defined for extension %s", ext)
+			}
+			if !strings.HasPrefix(script, a.prefix) {
+				t.Errorf("expected script to start with %q, got prefix: %q", a.prefix, script[:min(len(a.prefix)+20, len(script))])
+			}
+			if a.suffix != "" {
+				trimmed := strings.TrimRight(script, "\r\n\t ")
+				if !strings.HasSuffix(trimmed, a.suffix) {
+					t.Errorf("expected script to end with %q, got suffix: %q", a.suffix, trimmed[max(0, len(trimmed)-len(a.suffix)-20):])
+				}
+			}
+		})
 	}
 }
 
@@ -108,7 +152,7 @@ func TestQlikview_ExtractSucceeds_ExitCode0(t *testing.T) {
 	}
 
 	out := buf.String()
-	if !strings.Contains(out, "Extracted 1 scripts") {
-		t.Errorf("expected 'Extracted 1 scripts' in summary, got: %q", out)
+	if !strings.Contains(out, "Extracted 2 scripts") {
+		t.Errorf("expected 'Extracted 2 scripts' in summary, got: %q", out)
 	}
 }
