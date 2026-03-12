@@ -141,11 +141,11 @@ make release        # tags v1.3.0, pushes → triggers GoReleaser
 ```makefile
 install-tools:
 	go install github.com/caarlos0/svu@latest
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin vX.Y.Z
 ```
 
 `svu` is installed via `go install` (idiomatic for Go tools).
-`golangci-lint` is installed via the official install script to a versioned binary in `$GOPATH/bin` (the `go install` path is officially unsupported for golangci-lint).
+`golangci-lint` is installed via the official install script to a versioned binary in `$GOPATH/bin` (the `go install` path is officially unsupported for golangci-lint). The version (`vX.Y.Z`) must match the version pinned in `ci.yml`'s `golangci-lint-action` step to ensure local/CI parity.
 
 **`make install-hooks`** copies the pre-commit script:
 
