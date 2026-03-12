@@ -43,7 +43,7 @@ func TestExportCmd_SourceNotFound(t *testing.T) {
 func TestExportCmd_SourceIsFile(t *testing.T) {
 	f, _ := os.CreateTemp("", "*.qvw")
 	_ = f.Close()
-	defer os.Remove(f.Name())
+	defer func() { _ = os.Remove(f.Name()) }()
 
 	root := cmd.NewRootCmd()
 	root.SetArgs([]string{"export", "--source", f.Name()})
