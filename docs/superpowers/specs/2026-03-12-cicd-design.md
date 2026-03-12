@@ -25,9 +25,9 @@ Set up a complete CI/CD pipeline for the `qlik-script-extractor` CLI:
 2. Runs `go test ./...`
 3. Exits non-zero (blocking the commit) if either step fails
 
-**Setup:** Developers run `make install-hooks` once after cloning. This copies (not symlinks) `scripts/pre-commit` into `.git/hooks/pre-commit` to ensure Windows compatibility (symlinks require Developer Mode on Windows). The copy is idempotent — re-running overwrites.
+**Setup:** Developers run `make install-hooks` once after cloning. This copies `scripts/pre-commit` into `.git/hooks/pre-commit`. The copy is idempotent — re-running overwrites.
 
-**Platform note:** The pre-commit hook is a shell script and only runs on Unix (Linux/macOS) developers' machines. Windows developers using Git Bash or WSL are covered; native Windows `cmd.exe`/PowerShell users are not. This is acceptable because the CI gate (Section 2) provides the same protection for all contributors.
+**Platform note:** Development takes place inside the project devcontainer (Linux), so the hook runs on all contributors' machines without exception.
 
 ## 2. GitHub Actions CI
 
