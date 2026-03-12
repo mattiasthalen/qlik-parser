@@ -57,9 +57,17 @@ artifacts to text files alongside or under --out.`,
 				}
 			}
 
-			qvwPaths, walkWarns := extractor.Walk(sourceDir)
+			qlikPaths, walkWarns := extractor.Walk(sourceDir)
 			for _, w := range walkWarns {
 				log.Warn().Msg(w)
+			}
+
+			// Filter to only .qvw files (skip .qvf files for now)
+			var qvwPaths []string
+			for _, p := range qlikPaths {
+				if filepath.Ext(p) == ".qvw" {
+					qvwPaths = append(qvwPaths, p)
+				}
 			}
 
 			isTTY := ui.IsTTY(os.Stdout)
@@ -75,7 +83,13 @@ artifacts to text files alongside or under --out.`,
 					relPath = filepath.Base(qvwPath)
 				}
 
-				scriptContent, extractErr := extractor.ExtractScript(qvwPath)
+				var scriptContent string
+				var extractErr error
+				if filepath.Ext(qvwPath) == ".qvf" {
+					scriptContent, extractErr = extractor.ExtractScriptFromQVF(qvwPath)
+				} else {
+					scriptContent, extractErr = extractor.ExtractScript(qvwPath)
+				}
 				if extractErr != nil {
 					var noScript *extractor.NoScriptError
 					if errors.As(extractErr, &noScript) {

@@ -8,7 +8,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Walk recursively collects all *.qvw file paths under root.
+// Walk recursively collects all *.qvw and *.qvf file paths under root.
 // Returns sorted paths and a slice of warning messages for unreadable directories.
 // Symlinks are not followed.
 func Walk(root string) (paths []string, warns []string) {
@@ -26,7 +26,8 @@ func Walk(root string) (paths []string, warns []string) {
 		if d.Type()&fs.ModeSymlink != 0 {
 			return nil
 		}
-		if !d.IsDir() && filepath.Ext(path) == ".qvw" {
+		ext := filepath.Ext(path)
+		if !d.IsDir() && (ext == ".qvw" || ext == ".qvf") {
 			paths = append(paths, path)
 		}
 		return nil
