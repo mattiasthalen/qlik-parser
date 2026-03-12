@@ -1,6 +1,7 @@
 package extractor_test
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -9,99 +10,121 @@ import (
 	"github.com/mattiasthalen/qlik-parser/internal/extractor"
 )
 
-func TestResolveOutputPath_Alongside(t *testing.T) {
+func TestResolveOutputDir_QVW_Alongside(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Unix path test not applicable on Windows")
 	}
-	qvwPath := "/data/etl/sales.qvw"
-	got := extractor.ResolveOutputPath(qvwPath, "/data", "")
-	want := "/data/etl/sales.qvs"
+	got := extractor.ResolveOutputDir("/data/etl/sales.qvw", "/data", "")
+	want := "/data/etl/sales.qvw"
 	if got != want {
 		t.Errorf("expected %s, got %s", want, got)
 	}
 }
 
-func TestResolveOutputPath_Mirror(t *testing.T) {
+func TestResolveOutputDir_QVW_Mirror(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Unix path test not applicable on Windows")
 	}
-	qvwPath := "/data/etl/sales.qvw"
-	got := extractor.ResolveOutputPath(qvwPath, "/data", "/out")
-	want := "/out/etl/sales.qvs"
+	got := extractor.ResolveOutputDir("/data/etl/sales.qvw", "/data", "/out")
+	want := "/out/etl/sales.qvw"
 	if got != want {
 		t.Errorf("expected %s, got %s", want, got)
 	}
 }
 
-func TestResolveOutputPath_OutEqualSource(t *testing.T) {
+func TestResolveOutputDir_OutEqualSource(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		t.Skip("Unix path test not applicable on Windows")
 	}
-	qvwPath := "/data/etl/sales.qvw"
-	got := extractor.ResolveOutputPath(qvwPath, "/data", "/data")
-	want := "/data/etl/sales.qvs"
+	got := extractor.ResolveOutputDir("/data/etl/sales.qvw", "/data", "/data")
+	want := "/data/etl/sales.qvw"
 	if got != want {
 		t.Errorf("expected %s, got %s", want, got)
 	}
 }
 
-func TestWriteScript_CreatesFile(t *testing.T) {
+func TestResolveOutputDir_QVF_Alongside(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
+	got := extractor.ResolveOutputDir("/data/etl/app.qvf", "/data", "")
+	want := "/data/etl/app.qvf"
+	if got != want {
+		t.Errorf("expected %s, got %s", want, got)
+	}
+}
+
+func TestResolveOutputDir_QVF_Mirror(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix path test not applicable on Windows")
+	}
+	got := extractor.ResolveOutputDir("/data/etl/app.qvf", "/data", "/out")
+	want := "/out/etl/app.qvf"
+	if got != want {
+		t.Errorf("expected %s, got %s", want, got)
+	}
+}
+
+func TestWriteArtifacts_CreatesFiles(t *testing.T) {
 	dir := t.TempDir()
-	outPath := filepath.Join(dir, "sub", "output.qvs")
-	err := extractor.WriteScript(outPath, "/// LOAD * FROM t;", false)
-	if err != nil {
+	outDir := filepath.Join(dir, "sub", "sales.qvw")
+	artifacts := []extractor.Artifact{
+		{Name: "script.qvs", Content: []byte("/// LOAD * FROM t;")},
+		{Name: "measures.json", Content: []byte("[]")},
+	}
+	if err := extractor.WriteArtifacts(outDir, artifacts, false); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	content, err := os.ReadFile(outPath)
-	if err != nil {
-		t.Fatalf("file not created: %v", err)
-	}
-	if string(content) != "/// LOAD * FROM t;" {
-		t.Errorf("unexpected content: %q", string(content))
+	for _, a := range artifacts {
+		p := filepath.Join(outDir, a.Name)
+		content, err := os.ReadFile(p)
+		if err != nil {
+			t.Fatalf("file not created: %s: %v", a.Name, err)
+		}
+		if !bytes.Equal(content, a.Content) {
+			t.Errorf("%s: got %q, want %q", a.Name, content, a.Content)
+		}
 	}
 }
 
-func TestWriteScript_DryRunDoesNotWrite(t *testing.T) {
+func TestWriteArtifacts_DryRunDoesNotWrite(t *testing.T) {
 	dir := t.TempDir()
-	outPath := filepath.Join(dir, "output.qvs")
-	err := extractor.WriteScript(outPath, "/// LOAD * FROM t;", true)
-	if err != nil {
+	outDir := filepath.Join(dir, "sales.qvw")
+	artifacts := []extractor.Artifact{
+		{Name: "script.qvs", Content: []byte("///")},
+	}
+	if err := extractor.WriteArtifacts(outDir, artifacts, true); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if _, err := os.Stat(outPath); !os.IsNotExist(err) {
-		t.Error("expected file NOT to exist in dry-run mode")
+	if _, err := os.Stat(outDir); !os.IsNotExist(err) {
+		t.Error("expected output dir NOT to exist in dry-run mode")
 	}
 }
 
-func TestWriteScript_CreatesIntermediateDirs(t *testing.T) {
+func TestWriteArtifacts_CreatesIntermediateDirs(t *testing.T) {
 	dir := t.TempDir()
-	deep := filepath.Join(dir, "a", "b", "c", "output.qvs")
-	if err := extractor.WriteScript(deep, "///", false); err != nil {
-		t.Fatalf("expected dirs to be auto-created, got: %v", err)
+	outDir := filepath.Join(dir, "a", "b", "sales.qvw")
+	artifacts := []extractor.Artifact{
+		{Name: "script.qvs", Content: []byte("///")},
 	}
-	if _, err := os.Stat(deep); err != nil {
-		t.Errorf("file not found after WriteScript: %v", err)
+	if err := extractor.WriteArtifacts(outDir, artifacts, false); err != nil {
+		t.Fatalf("expected dirs to be auto-created: %v", err)
 	}
-}
-
-func TestResolveOutputPath_QVF_Alongside(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Unix path test not applicable on Windows")
-	}
-	got := extractor.ResolveOutputPath("/data/etl/app.qvf", "/data", "")
-	want := "/data/etl/app.qvf.qvs"
-	if got != want {
-		t.Errorf("expected %s, got %s", want, got)
+	if _, err := os.Stat(filepath.Join(outDir, "script.qvs")); err != nil {
+		t.Errorf("file not found: %v", err)
 	}
 }
 
-func TestResolveOutputPath_QVF_Mirror(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		t.Skip("Unix path test not applicable on Windows")
+func TestWriteArtifacts_FailFast(t *testing.T) {
+	// Make the output dir a file so MkdirAll fails.
+	dir := t.TempDir()
+	blocker := filepath.Join(dir, "blocker")
+	_ = os.WriteFile(blocker, []byte("x"), 0644)
+	artifacts := []extractor.Artifact{
+		{Name: "script.qvs", Content: []byte("///")},
 	}
-	got := extractor.ResolveOutputPath("/data/etl/app.qvf", "/data", "/out")
-	want := "/out/etl/app.qvf.qvs"
-	if got != want {
-		t.Errorf("expected %s, got %s", want, got)
+	err := extractor.WriteArtifacts(blocker, artifacts, false)
+	if err == nil {
+		t.Error("expected error when outDir is a file, got nil")
 	}
 }

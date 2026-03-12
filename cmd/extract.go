@@ -107,10 +107,12 @@ artifacts to text files alongside or under --out.`,
 					continue
 				}
 
-				outPath := extractor.ResolveOutputPath(qvwPath, sourceDir, outDir)
+				outDirPath := extractor.ResolveOutputDir(qvwPath, sourceDir, outDir)
+				artifactName := "script.qvs"
+				outPath := filepath.Join(outDirPath, artifactName)
 				relOut, err := filepath.Rel(sourceDir, outPath)
 				if err != nil {
-					relOut = filepath.Base(outPath)
+					relOut = filepath.Join(filepath.Base(outDirPath), artifactName)
 				}
 				if outDir != "" && outDir != sourceDir {
 					if r, err := filepath.Rel(outDir, outPath); err == nil {
@@ -118,7 +120,10 @@ artifacts to text files alongside or under --out.`,
 					}
 				}
 
-				writeErr := extractor.WriteScript(outPath, scriptContent, dryRun)
+				artifacts := []extractor.Artifact{
+					{Name: artifactName, Content: []byte(scriptContent)},
+				}
+				writeErr := extractor.WriteArtifacts(outDirPath, artifacts, dryRun)
 				if writeErr != nil {
 					hasErr = true
 					printer.ClearSpinner()
