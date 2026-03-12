@@ -3,11 +3,11 @@ layout: default
 title: qlik-parser
 ---
 
-<div class="hero">
+<div class="hero" markdown="1">
 
 # qlik-parser
 
-Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files.
+Extract artifacts from QlikView (.qvw) and Qlik Sense (.qvf) files.
 
 <pre class="terminal"><code>qlik-parser extract --source ./qlik-apps --out ./scripts</code></pre>
 
@@ -18,7 +18,7 @@ Extract load scripts from QlikView (.qvw) and Qlik Sense (.qvf) files.
 
 ## Quick Start {#quick-start}
 
-Get up and running in minutes. Download the binary for your platform, place it on your `PATH`, and run `qlik-parser extract` to pull all load scripts out of a directory of Qlik files.
+Get up and running in minutes. Download the binary for your platform, place it on your `PATH`, and run `qlik-parser extract` to extract all artifacts out of a directory of Qlik files.
 
 ## Installation {#install}
 
@@ -49,16 +49,21 @@ Extract the `.zip` file and add the folder containing `qlik-parser.exe` to your 
 
 ### `extract`
 
-Extract load scripts from all QlikView (.qvw) and Qlik Sense (.qvf) files in a directory.
+Extract artifacts from all QlikView (.qvw) and Qlik Sense (.qvf) files in a directory.
 
 | Flag | Short | Default | Description |
 |------|-------|---------|-------------|
-| `--script` | | | Extract a single file by path |
-| `--source` | `-s` | `./` | Source directory |
-| `--out` | `-o` | `./out` | Output directory |
+| `--script` | | `false` | Extract load scripts |
+| `--measures` | | `false` | Extract master measures (QVF only) |
+| `--dimensions` | | `false` | Extract master dimensions (QVF only) |
+| `--variables` | | `false` | Extract variables (QVF only) |
+| `--source` | `-s` | current directory | Source directory to scan |
+| `--out` | `-o` | alongside source files | Output directory |
 | `--dry-run` | | `false` | Preview without writing files |
 
-Scripts are written to `<out>/<filename>.qvs`. Existing files are overwritten.
+> No artifact flags passed → all artifacts extracted. Explicit flags → only those artifact types.
+
+Each source file produces a folder named `<filename>.<ext>/` containing the extracted artifacts. Existing files are overwritten.
 
 Preview what would be extracted without writing any files:
 
