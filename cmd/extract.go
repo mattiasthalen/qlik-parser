@@ -14,18 +14,24 @@ import (
 	"github.com/mattiasthalen/qlik-parser/internal/ui"
 )
 
-func newExportCmd() *cobra.Command {
+func newExtractCmd() *cobra.Command {
 	var sourceDir string
 	var outDir string
 	var dryRun bool
+	var script bool
 
 	cmd := &cobra.Command{
-		Use:   "export",
-		Short: "Extract load scripts from .qvw files",
-		Long: `Recursively scans --source for .qvw files and extracts the embedded
-load scripts to .qvs text files alongside or under --out.`,
+		Use:   "extract",
+		Short: "Extract artifacts from .qvw files",
+		Long: `Recursively scans --source for .qvw files and extracts embedded
+artifacts to text files alongside or under --out.`,
 		SilenceUsage: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if !script { // expand to: if !script && !variables && !charts as flags are added
+				_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "error: no artifact type selected\n")
+				return ExitError(1)
+			}
+
 			if sourceDir == "" {
 				cwd, err := os.Getwd()
 				if err != nil {
@@ -69,7 +75,7 @@ load scripts to .qvs text files alongside or under --out.`,
 					relPath = filepath.Base(qvwPath)
 				}
 
-				script, extractErr := extractor.ExtractScript(qvwPath)
+				scriptContent, extractErr := extractor.ExtractScript(qvwPath)
 				if extractErr != nil {
 					var noScript *extractor.NoScriptError
 					if errors.As(extractErr, &noScript) {
@@ -106,7 +112,7 @@ load scripts to .qvs text files alongside or under --out.`,
 					}
 				}
 
-				writeErr := extractor.WriteScript(outPath, script, dryRun)
+				writeErr := extractor.WriteScript(outPath, scriptContent, dryRun)
 				if writeErr != nil {
 					hasErr = true
 					printer.ClearSpinner()
@@ -123,7 +129,7 @@ load scripts to .qvs text files alongside or under --out.`,
 					Status:    ui.StatusOK,
 					QVWPath:   relPath,
 					QVSPath:   relOut,
-					CharCount: len(script),
+					CharCount: len(scriptContent),
 				})
 			}
 
@@ -139,6 +145,7 @@ load scripts to .qvs text files alongside or under --out.`,
 	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw files (default: current directory)")
 	cmd.Flags().StringVarP(&outDir, "out", "o", "", "Export directory (default: alongside .qvw files)")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be extracted without writing files")
+	cmd.Flags().BoolVar(&script, "script", true, "Extract load scripts")
 
 	cmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
 		_, _ = fmt.Fprintf(c.ErrOrStderr(), "error: %v\n", err)

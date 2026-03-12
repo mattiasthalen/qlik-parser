@@ -14,9 +14,9 @@ import (
 
 var update = flag.Bool("update", false, "Update golden files")
 
-func TestExportCmd_HelpRegistered(t *testing.T) {
+func TestExtractCmd_HelpRegistered(t *testing.T) {
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--help"})
+	root.SetArgs([]string{"extract", "--help"})
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 	err := root.Execute()
@@ -25,13 +25,13 @@ func TestExportCmd_HelpRegistered(t *testing.T) {
 	}
 	out := buf.String()
 	if !bytes.Contains([]byte(out), []byte("--source")) {
-		t.Errorf("expected --source flag in export help, got: %s", out)
+		t.Errorf("expected --source flag in extract help, got: %s", out)
 	}
 }
 
-func TestExportCmd_SourceNotFound(t *testing.T) {
+func TestExtractCmd_SourceNotFound(t *testing.T) {
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", "/nonexistent/path/xyz"})
+	root.SetArgs([]string{"extract", "--source", "/nonexistent/path/xyz"})
 	errBuf := &bytes.Buffer{}
 	root.SetErr(errBuf)
 	err := root.Execute()
@@ -44,13 +44,13 @@ func TestExportCmd_SourceNotFound(t *testing.T) {
 	}
 }
 
-func TestExportCmd_SourceIsFile(t *testing.T) {
+func TestExtractCmd_SourceIsFile(t *testing.T) {
 	f, _ := os.CreateTemp("", "*.qvw")
 	_ = f.Close()
 	defer func() { _ = os.Remove(f.Name()) }()
 
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", f.Name()})
+	root.SetArgs([]string{"extract", "--source", f.Name()})
 	errBuf := &bytes.Buffer{}
 	root.SetErr(errBuf)
 	err := root.Execute()
@@ -60,12 +60,12 @@ func TestExportCmd_SourceIsFile(t *testing.T) {
 	}
 }
 
-func TestExportCmd_EmptySourceDir(t *testing.T) {
+func TestExtractCmd_EmptySourceDir(t *testing.T) {
 	dir := t.TempDir()
 	buf := &bytes.Buffer{}
 	root := cmd.NewRootCmd()
 	root.SetOut(buf)
-	root.SetArgs([]string{"export", "--source", dir})
+	root.SetArgs([]string{"extract", "--source", dir})
 	err := root.Execute()
 	if err != nil {
 		t.Fatalf("expected no error for empty dir, got: %v", err)
@@ -76,9 +76,9 @@ func TestExportCmd_EmptySourceDir(t *testing.T) {
 	}
 }
 
-func TestExportCmd_BadFlag_ExitCode2(t *testing.T) {
+func TestExtractCmd_BadFlag_ExitCode2(t *testing.T) {
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--bogus-unknown-flag"})
+	root.SetArgs([]string{"extract", "--bogus-unknown-flag"})
 	errBuf := &bytes.Buffer{}
 	root.SetErr(errBuf)
 	err := root.Execute()
@@ -91,7 +91,7 @@ func TestExportCmd_BadFlag_ExitCode2(t *testing.T) {
 	}
 }
 
-func TestExportCmd_DryRunNoFilesWritten(t *testing.T) {
+func TestExtractCmd_DryRunNoFilesWritten(t *testing.T) {
 	srcDir := t.TempDir()
 	outDir := t.TempDir()
 
@@ -103,7 +103,7 @@ func TestExportCmd_DryRunNoFilesWritten(t *testing.T) {
 	_ = os.WriteFile(filepath.Join(srcDir, "test.qvw"), validQVW, 0644)
 
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", srcDir, "--out", outDir, "--dry-run"})
+	root.SetArgs([]string{"extract", "--source", srcDir, "--out", outDir, "--dry-run"})
 	buf := &bytes.Buffer{}
 	root.SetOut(buf)
 	if err := root.Execute(); err != nil {
@@ -118,13 +118,13 @@ func TestExportCmd_DryRunNoFilesWritten(t *testing.T) {
 	}
 }
 
-func TestExportCmd_Integration_ValidFixture(t *testing.T) {
+func TestExtractCmd_Integration_ValidFixture(t *testing.T) {
 	fixturesDir := filepath.Join("..", "internal", "extractor", "testdata", "fixtures")
 	outDir := t.TempDir()
 
 	root := cmd.NewRootCmd()
 	root.SetArgs([]string{
-		"export",
+		"extract",
 		"--source", fixturesDir,
 		"--out", outDir,
 	})
@@ -156,13 +156,13 @@ func TestExportCmd_Integration_ValidFixture(t *testing.T) {
 	}
 }
 
-func TestExportCmd_Integration_NoScriptIsWarn(t *testing.T) {
+func TestExtractCmd_Integration_NoScriptIsWarn(t *testing.T) {
 	fixturesDir := filepath.Join("..", "internal", "extractor", "testdata", "fixtures")
 	outDir := t.TempDir()
 
 	root := cmd.NewRootCmd()
 	root.SetArgs([]string{
-		"export",
+		"extract",
 		"--source", fixturesDir,
 		"--out", outDir,
 	})
@@ -176,7 +176,7 @@ func TestExportCmd_Integration_NoScriptIsWarn(t *testing.T) {
 	}
 }
 
-func TestExportCmd_ErrorMessage_DoesNotContainAbsPath(t *testing.T) {
+func TestExtractCmd_ErrorMessage_DoesNotContainAbsPath(t *testing.T) {
 	srcDir := t.TempDir()
 	// Write a too-short QVW file (< 23 bytes) which triggers an error with path in message
 	_ = os.WriteFile(filepath.Join(srcDir, "short.qvw"), []byte("tooshort"), 0644)
@@ -184,7 +184,7 @@ func TestExportCmd_ErrorMessage_DoesNotContainAbsPath(t *testing.T) {
 	buf := &bytes.Buffer{}
 	errBuf := &bytes.Buffer{}
 	root := cmd.NewRootCmd()
-	root.SetArgs([]string{"export", "--source", srcDir})
+	root.SetArgs([]string{"extract", "--source", srcDir})
 	root.SetOut(buf)
 	root.SetErr(errBuf)
 	_ = root.Execute()
@@ -195,13 +195,13 @@ func TestExportCmd_ErrorMessage_DoesNotContainAbsPath(t *testing.T) {
 	}
 }
 
-func TestExportCmd_Integration_ErrorFilesSetExitCode(t *testing.T) {
+func TestExtractCmd_Integration_ErrorFilesSetExitCode(t *testing.T) {
 	fixturesDir := filepath.Join("..", "internal", "extractor", "testdata", "fixtures")
 	outDir := t.TempDir()
 
 	root := cmd.NewRootCmd()
 	root.SetArgs([]string{
-		"export",
+		"extract",
 		"--source", fixturesDir,
 		"--out", outDir,
 	})
@@ -210,5 +210,23 @@ func TestExportCmd_Integration_ErrorFilesSetExitCode(t *testing.T) {
 	var exitErr *cmd.ExitCodeError
 	if !errors.As(err, &exitErr) || exitErr.Code != 1 {
 		t.Errorf("expected ExitCodeError(1) due to corrupt fixtures, got: %v", err)
+	}
+}
+
+func TestExtractCmd_NoArtifactSelected(t *testing.T) {
+	root := cmd.NewRootCmd()
+	root.SetArgs([]string{"extract", "--script=false", "--source", "/nonexistent/path/xyz"})
+	errBuf := &bytes.Buffer{}
+	root.SetErr(errBuf)
+	err := root.Execute()
+	if err == nil {
+		t.Fatal("expected error when no artifact selected, got nil")
+	}
+	var exitErr *cmd.ExitCodeError
+	if !errors.As(err, &exitErr) || exitErr.Code != 1 {
+		t.Errorf("expected ExitCodeError(1), got: %v", err)
+	}
+	if !bytes.Contains(errBuf.Bytes(), []byte("no artifact type selected")) {
+		t.Errorf("expected 'no artifact type selected' in stderr, got: %s", errBuf.String())
 	}
 }
