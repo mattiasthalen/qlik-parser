@@ -588,25 +588,63 @@ Add `"path/filepath"` to imports if not already present.
 
 - [ ] **Step 3: Update `TestQlikview_AllScriptsStartWithTripleSlash`**
 
-Replace:
+This test is renamed to `TestQlikview_AllScriptsHaveExpectedContent` to reflect the richer assertions. Replace the entire test body:
+
 ```go
-script, err := extractor.ExtractScript(p)
-```
-with:
-```go
-var script string
-var err error
-switch filepath.Ext(p) {
-case ".qvf":
-    script, err = extractor.ExtractScriptFromQVF(p)
-default:
-    script, err = extractor.ExtractScript(p)
+func TestQlikview_AllScriptsHaveExpectedContent(t *testing.T) {
+	skipIfNoQlikviewFixtures(t)
+
+	// Known content anchors per fixture, keyed by file extension.
+	// prefix: first distinctive text after ///$tab <tab name>\r\n
+	// suffix: last distinctive text at the very end of the script (trimmed)
+	type anchor struct {
+		prefix string
+		suffix string
+	}
+	anchors := map[string]anchor{
+		".qvw": {
+			prefix: "///$tab Main\r\n//Copyright",
+			suffix: "*/",
+		},
+		".qvf": {
+			prefix: "///$tab ** about **\r\n/*",
+			suffix: "Trace Woohoo! $(reload_message) Rejoice!;",
+		},
+	}
+
+	paths, _ := extractor.Walk(qlikviewTestdata)
+	for _, p := range paths {
+		rel, _ := filepath.Rel(qlikviewTestdata, p)
+		ext := filepath.Ext(p)
+		t.Run(rel, func(t *testing.T) {
+			var script string
+			var err error
+			switch ext {
+			case ".qvf":
+				script, err = extractor.ExtractScriptFromQVF(p)
+			default:
+				script, err = extractor.ExtractScript(p)
+			}
+			if err != nil {
+				t.Fatalf("extraction error: %v", err)
+			}
+			a, ok := anchors[ext]
+			if !ok {
+				t.Skipf("no anchor defined for extension %s", ext)
+			}
+			if !strings.HasPrefix(script, a.prefix) {
+				t.Errorf("expected script to start with %q, got prefix: %q", a.prefix, script[:min(len(a.prefix)+20, len(script))])
+			}
+			trimmed := strings.TrimRight(script, "\r\n\t ")
+			if !strings.HasSuffix(trimmed, a.suffix) {
+				t.Errorf("expected script to end with %q, got suffix: %q", a.suffix, trimmed[max(0, len(trimmed)-len(a.suffix)-20):])
+			}
+		})
+	}
 }
 ```
 
-Change the assertion from `strings.HasPrefix(script, "///")` to `strings.HasPrefix(script, "///$tab")` and update the error message to `"expected script to start with ///$tab, got: ..."`.
-
-Note: `filepath` is already imported in this file.
+Note: `filepath`, `strings` are already imported. The old `TestQlikview_AllScriptsStartWithTripleSlash` function is deleted and replaced by this one.
 
 - [ ] **Step 4: Update `TestQlikview_ExtractSucceeds_ExitCode0`**
 
