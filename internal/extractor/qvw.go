@@ -46,13 +46,13 @@ func ExtractScript(path string) (string, error) {
 	compressed := data[headerSize:]
 	r, err := zlib.NewReader(bytes.NewReader(compressed))
 	if err != nil {
-		return "", fmt.Errorf("%s: zlib: %w", path, err)
+		return "", fmt.Errorf("%s: %w", path, err)
 	}
 	defer func() { _ = r.Close() }()
 
 	decompressed, err := io.ReadAll(r)
 	if err != nil {
-		return "", fmt.Errorf("%s: zlib: %w", path, err)
+		return "", fmt.Errorf("%s: %w", path, err)
 	}
 
 	return extractFromBytes(path, decompressed)

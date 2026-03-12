@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -82,10 +83,14 @@ load scripts to .qvs text files alongside or under --out.`,
 					}
 					hasErr = true
 					printer.ClearSpinner()
+					errMsg := extractErr.Error()
+					if after, ok := strings.CutPrefix(errMsg, qvwPath+": "); ok {
+						errMsg = after
+					}
 					printer.FileResult(ui.Result{
 						Status:  ui.StatusErr,
 						QVWPath: relPath,
-						Message: extractErr.Error(),
+						Message: errMsg,
 					})
 					continue
 				}
@@ -134,6 +139,11 @@ load scripts to .qvs text files alongside or under --out.`,
 	cmd.Flags().StringVarP(&sourceDir, "source", "s", "", "Source directory to scan for .qvw files (default: current directory)")
 	cmd.Flags().StringVarP(&outDir, "out", "o", "", "Export directory (default: alongside .qvw files)")
 	cmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be extracted without writing files")
+
+	cmd.SetFlagErrorFunc(func(c *cobra.Command, err error) error {
+		_, _ = fmt.Fprintf(c.ErrOrStderr(), "error: %v\n", err)
+		return ExitError(2)
+	})
 
 	return cmd
 }

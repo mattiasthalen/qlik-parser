@@ -41,6 +41,9 @@ func TestExtractScript_InvalidZlib(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error for invalid zlib, got nil")
 	}
+	if strings.Contains(err.Error(), "zlib: zlib:") {
+		t.Errorf("error message has double zlib: prefix: %v", err)
+	}
 }
 
 func TestExtractScript_NoScriptMarker(t *testing.T) {

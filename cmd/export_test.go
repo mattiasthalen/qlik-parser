@@ -6,6 +6,7 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/mattiasthalen/qlik-script-extractor/cmd"
@@ -85,8 +86,8 @@ func TestExportCmd_BadFlag_ExitCode2(t *testing.T) {
 		t.Fatal("expected error for unknown flag, got nil")
 	}
 	var exitErr *cmd.ExitCodeError
-	if errors.As(err, &exitErr) {
-		t.Errorf("expected cobra error (not ExitCodeError) for bad flag, got ExitCodeError(%d)", exitErr.Code)
+	if !errors.As(err, &exitErr) || exitErr.Code != 2 {
+		t.Errorf("expected ExitCodeError(2) for bad flag, got: %v", err)
 	}
 }
 
@@ -171,6 +172,25 @@ func TestExportCmd_Integration_NoScriptIsWarn(t *testing.T) {
 	out := buf.String()
 	if !bytes.Contains([]byte(out), []byte("no script found")) {
 		t.Errorf("expected 'no script found' warn in output, got: %s", out)
+	}
+}
+
+func TestExportCmd_ErrorMessage_DoesNotContainAbsPath(t *testing.T) {
+	srcDir := t.TempDir()
+	// Write a too-short QVW file (< 23 bytes) which triggers an error with path in message
+	_ = os.WriteFile(filepath.Join(srcDir, "short.qvw"), []byte("tooshort"), 0644)
+
+	buf := &bytes.Buffer{}
+	errBuf := &bytes.Buffer{}
+	root := cmd.NewRootCmd()
+	root.SetArgs([]string{"export", "--source", srcDir})
+	root.SetOut(buf)
+	root.SetErr(errBuf)
+	_ = root.Execute()
+
+	out := buf.String()
+	if strings.Contains(out, srcDir) {
+		t.Errorf("error output should not contain abs path %q, got: %s", srcDir, out)
 	}
 }
 

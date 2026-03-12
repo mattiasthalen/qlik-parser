@@ -39,9 +39,10 @@ type Printer struct {
 	tty    bool
 	dryRun bool
 
-	okCount   int
-	warnCount int
-	errCount  int
+	okCount     int
+	warnCount   int
+	errCount    int
+	spinnerWidth int
 }
 
 // NewPrinter creates a Printer. tty enables color/spinner; dryRun appends [dry run].
@@ -115,7 +116,9 @@ func (p *Printer) UpdateSpinner(current, total int) {
 	if !p.tty {
 		return
 	}
-	_, _ = fmt.Fprintf(p.w, "\r  Extracting... %d/%d", current, total)
+	text := fmt.Sprintf("  Extracting... %d/%d", current, total)
+	p.spinnerWidth = len(text)
+	_, _ = fmt.Fprintf(p.w, "\r%s", text)
 }
 
 // ClearSpinner clears the spinner line (TTY only).
@@ -123,7 +126,7 @@ func (p *Printer) ClearSpinner() {
 	if !p.tty {
 		return
 	}
-	_, _ = fmt.Fprintf(p.w, "\r%s\r", strings.Repeat(" ", 40))
+	_, _ = fmt.Fprintf(p.w, "\r%s\r", strings.Repeat(" ", p.spinnerWidth))
 }
 
 // colorize applies the style only in TTY mode.

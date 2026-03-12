@@ -117,3 +117,22 @@ func TestPrinter_Summary_ZeroFiles(t *testing.T) {
 		t.Errorf("expected 'Extracted 0 scripts' in zero-file summary, got: %q", out)
 	}
 }
+
+func TestClearSpinner_PaddingMatchesSpinnerTextWidth(t *testing.T) {
+	buf := &bytes.Buffer{}
+	p := ui.NewPrinter(buf, true, false) // TTY=true to enable spinner
+
+	// Write a spinner line and measure its visible length (everything after leading \r)
+	p.UpdateSpinner(1, 1)
+	spinnerOutput := buf.String()
+	buf.Reset()
+	visibleLen := len(strings.TrimPrefix(spinnerOutput, "\r"))
+
+	// ClearSpinner must pad with exactly as many spaces as the visible spinner text
+	p.ClearSpinner()
+	clearOut := buf.String()
+	spaces := strings.Count(clearOut, " ")
+	if spaces != visibleLen {
+		t.Errorf("ClearSpinner padding = %d spaces, want %d (spinner text width)", spaces, visibleLen)
+	}
+}
