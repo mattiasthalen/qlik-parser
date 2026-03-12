@@ -8,7 +8,7 @@ Project-specific memory (conventions, feedback, context) lives in this file (`CL
 
 - Commit messages use conventional commits style: `feat:`, `fix:`, `chore:`, `docs:`, etc.
 - Merge commits also follows the conventional commit style.
-- All commits must be pushed to origin after committing.
+- Never skip push, all commits must be pushed to origin after committing.
 
 ## Feedback
 
